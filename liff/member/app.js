@@ -1,7 +1,7 @@
 // ===== 設定：LIFF ID 與 API 網址。正式網址（GitHub Pages）一律用真資料；本機預覽才載入 mock.js 的模擬資料 =====
 // 會員頁面送到 Make 情境「朕宏｜會員 API」，用欄位 a 分辨動作：me 我的身分（順便校正選單）｜apply 申請入會
 const CONFIG = {
-  liffId: "",
+  liffId: "2012132715-IdnIDWRU",
   apiUrl: "https://hook.us2.make.com/xj3tt9tr8e9m4q0cf1pwj37as8x0l7ki",
   namecardLiff: "https://liff.line.me/2012132715-XYXSuHpi",   // 會員功能：名片
 };
