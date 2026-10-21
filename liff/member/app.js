@@ -38,7 +38,14 @@ let api = { me: () => post({ a: "me" }), apply: f => post({ a: "apply", ...f }) 
 
 // ===== 狀態與畫面 =====
 const params = new URLSearchParams(location.search);
-const S = { view: params.get("v") === "about" ? "about" : "home", me: null, brand: {}, form: {}, busy: false, editing: false };
+// 選單上列三格的功能還在規劃，先顯示「即將推出」；做好之後在這裡換成真正的畫面
+const SOON = {
+  events: ["📅", "近期活動", "協會的課程、參訪與聚會，之後會列在這裡，也能直接報名。"],
+  members: ["👥", "協會會員列表", "之後可以在這裡認識其他會員：公司、專長與聯絡方式。"],
+  ai: ["✨", "AI 小幫手", "之後可以在這裡問協會、活動與入會的問題，AI 會幫你回答。"],
+};
+const V = params.get("v");
+const S = { view: V === "about" || SOON[V] ? V : "home", me: null, brand: {}, form: {}, busy: false, editing: false };
 
 function render() {
   const b = S.me && BADGE[S.me.state];
@@ -46,6 +53,7 @@ function render() {
   $("#badge").textContent = b ? b[1] : "";
   $("#bar").hidden = true;
   if (S.view === "about") return renderAbout();
+  if (SOON[S.view]) return renderSoon(SOON[S.view]);
   if (!S.me) { $("#app").innerHTML = `<p class="blocked">讀取中…</p>`; return; }
   const st = S.me.state;
   if (st === "member") return renderMember();
@@ -58,6 +66,11 @@ function renderAbout() {
   $("#app").innerHTML = `<h1>${esc(br.name || "關於協會")}</h1>
     <div class="card"><p>${esc(br.about || "")}</p>${br.contact ? `<p class="lead" style="margin-top:10px">${esc(br.contact)}</p>` : ""}</div>
     <div class="links"><a class="link" href="?v=home"><span class="ic">📝</span><span><b>會員專區</b><small>申請入會、查看會員資料</small></span></a></div>`;
+}
+function renderSoon([icon, title, text]) {
+  $("#app").innerHTML = `<div class="status"><div class="big">${icon}</div><h2>${title}</h2><p class="lead">${text}</p>
+    <p class="lead" style="margin-top:14px;font-weight:700;color:var(--brand)">即將推出</p></div>
+    <div class="links"><a class="link" href="?v=home"><span class="ic">🪪</span><span><b>會員專區</b><small>入會申請、我的會員資料</small></span></a></div>`;
 }
 function renderApply() {
   const editing = S.me.state === "pending";
@@ -159,5 +172,6 @@ async function loadMe() {
     await loadScript("mock.js"); api = window.MOCK_API;
   }
   render();
-  if (S.view !== "about") loadMe();
+  // 「即將推出」畫面和協會介紹不需要身分；其他畫面讀取身分（順便讓後端校正選單）
+  if (S.view === "home") loadMe();
 })();

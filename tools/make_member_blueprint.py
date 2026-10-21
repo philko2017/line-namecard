@@ -26,7 +26,8 @@ CONN_LINE = LN["messaging_connection_id"]
 MEMBER_LIFF = f"https://liff.line.me/{M['liff_id']}"
 NAMECARD_LIFF = f"https://liff.line.me/{LN['liff_id']}"
 ALIAS = "member"
-PANEL = 620   # 選單左側協會標誌區的寬度，和 tools/make_member_richmenu.py 一致
+# 選單是上下兩列、每列三欄（2500 × 1686），和 tools/make_member_richmenu.py 的 COLS、ROW 一致
+COLS, ROW = [0, 833, 1667, 2500], 843
 # 身分 → 頁面上的狀態代號
 STATE = '{{switch(%s; "審核中"; "pending"; "正式會員"; "member"; "停權"; "banned"; "guest")}}'
 # 申請表單欄位：頁面代號、Notion 欄位、型別、長度上限（和 liff/member/app.js 的 FIELDS 對應）
@@ -288,24 +289,24 @@ def build_events():
 
 def build_menu():
     """建立訪客選單（設為所有人的預設）和會員選單（別名 member）；清掉其他舊選單；把所有正式會員重新綁到新的會員選單。
-    圖片從 GitHub Pages 下載（tools/make_member_richmenu.py 產生），LINE 規定 2500×843、1MB 以內。"""
+    圖片從 GitHub Pages 下載（tools/make_member_richmenu.py 產生），LINE 規定 2500×1686、1MB 以內。"""
     b = B(10)
     uri = lambda u: {"type": "uri", "uri": u}
-    box = lambda x, w_: {"x": x, "y": 0, "width": w_, "height": 843}
-    about = {"bounds": box(0, PANEL), "action": uri(MEMBER_LIFF + "?v=about")}
-    cw = (2500 - PANEL) // 3
-    guest_areas = [about, {"bounds": box(PANEL, 2500 - PANEL), "action": uri(MEMBER_LIFF)}]
-    member_areas = [about,
-                    {"bounds": box(PANEL, cw), "action": uri(NAMECARD_LIFF)},
-                    {"bounds": box(PANEL + cw, cw), "action": uri(NAMECARD_LIFF + "?v=review")},
-                    {"bounds": box(PANEL + 2 * cw, 2500 - PANEL - 2 * cw), "action": uri(MEMBER_LIFF)}]
+
+    def area(col, row, url, span=1):
+        x = COLS[col]
+        return {"bounds": {"x": x, "y": row * ROW, "width": COLS[col + span] - x, "height": ROW}, "action": uri(url)}
+    # 上列兩張共用：近期活動｜協會會員列表｜AI 小幫手（目前都是會員頁面的「即將推出」畫面）
+    top = [area(0, 0, MEMBER_LIFF + "?v=events"), area(1, 0, MEMBER_LIFF + "?v=members"), area(2, 0, MEMBER_LIFF + "?v=ai")]
+    guest_areas = top + [area(0, 1, MEMBER_LIFF, span=3)]            # 下列一整格：申請加入
+    member_areas = top + [area(0, 1, NAMECARD_LIFF)]                 # 下列：名片掃描；另外兩格先空著，不設按鈕
 
     def make(name, img, areas, label):
         g = {"id": b.nid(), "module": "http:ActionGetFile", "version": 3, "parameters": {"handleErrors": False},
              "mapper": {"url": f"{ORIGIN}/line-namecard/assets/{img}", "method": "get", "serializeUrl": False, "shareCookies": False},
              "metadata": b.meta(f"下載{label}圖片")}
         m = {"id": b.nid(), "module": "line:createARichMenu", "version": 1, "parameters": {"__IMTCONN__": CONN_LINE},
-             "mapper": {"name": name, "chatBarText": "選單", "selected": True, "height": 843, "areas": areas,
+             "mapper": {"name": name, "chatBarText": "選單", "selected": True, "height": 2 * ROW, "areas": areas,
                         "data": f"{{{{{g['id']}.data}}}}", "filename": img},
              "metadata": b.meta(f"建立{label}", LINE_META)}
         return g, m
