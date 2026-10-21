@@ -196,38 +196,50 @@ def build(test_hook=None):
     N = new["id"]
     thumb = lambda m: "https://drive.google.com/thumbnail?id={{" + f"{m}.id" + "}}&sz=w1600"
 
-    def tail(with_photo):
-        """存照片 → 照片放進 Notion → Gemini 辨識 → 寫回欄位。有沒有合照分成兩條，因為模組上的篩選擋下就會停掉後面整條。"""
-        mods = []
-        card = b.drive_upload("名片照片存到雲端硬碟", "{{1.rid}}_名片.jpg", "1.card")
-        mods.append(card)
-        props = {"名片照片": {"files": [{"name": "名片.jpg", "type": "external", "external": {"url": thumb(card["id"])}}]},
+    def save_photos(with_photo, base, label, guard=False):
+        """存照片到雲端硬碟，檔名「<base>_名片.jpg」「<base>_合照.jpg」；回傳上傳模組和「照片放進 Notion」的模組。
+        guard：檔名來自 AI 辨識的人名，萬一含有引號會弄壞 JSON，所以這一步排在最後、出錯就略過，
+        只是 Notion 少了照片欄位，雲端硬碟的檔案和文字欄位都已經存好。失敗路線的檔名只有請求編號，不需要。"""
+        card = b.drive_upload(f"名片照片存到雲端硬碟（{label}）", base + "_名片.jpg", "1.card")
+        ups = [card]
+        props = {"名片照片": {"files": [{"name": "{{" + f"{card['id']}.name" + "}}", "type": "external",
+                                         "external": {"url": thumb(card["id"])}}]},
                  "名片照片連結": {"url": "{{" + f"{card['id']}.webViewLink" + "}}"}}
         if with_photo:
-            ph = b.drive_upload("合照存到雲端硬碟", "{{1.rid}}_合照.jpg", "1.photo")
-            mods.append(ph)
-            props["合照"] = {"files": [{"name": "合照.jpg", "type": "external", "external": {"url": thumb(ph["id"])}}]}
+            ph = b.drive_upload(f"合照存到雲端硬碟（{label}）", base + "_合照.jpg", "1.photo")
+            ups.append(ph)
+            props["合照"] = {"files": [{"name": "{{" + f"{ph['id']}.name" + "}}", "type": "external",
+                                       "external": {"url": thumb(ph["id"])}}]}
             props["合照連結"] = {"url": "{{" + f"{ph['id']}.webViewLink" + "}}"}
-        # 照片網址只有英數字，可以直接組 JSON；文字欄位交給 Notion 模組寫，Make 會處理跳脫
-        mods.append(b.notion_api("照片放進名片", "/v1/pages/{{" + f"{N}.id" + "}}", "PATCH",
-                                 json.dumps({"properties": props}, ensure_ascii=False)))
-        failed = [b.update("標成辨識失敗", f"{{{{{N}.id}}}}", [fv("狀態", "select", "辨識失敗")]), b.ignore()]
+        link = b.notion_api(f"照片放進名片（{label}）", "/v1/pages/{{" + f"{N}.id" + "}}", "PATCH",
+                            json.dumps({"properties": props}, ensure_ascii=False))
+        if guard:
+            link["onerror"] = [b.ignore()]
+        return ups, link
+
+    def failed_chain(with_photo, label):
+        """辨識失敗時：照片照樣存（檔名用請求編號），名片標成「辨識失敗」，讓使用者看照片手動填。"""
+        ups, link = save_photos(with_photo, "{{1.rid}}", label)
+        return ups + [b.update(f"標成辨識失敗（{label}）", f"{{{{{N}.id}}}}", [fv("狀態", "select", "辨識失敗")]), link, b.ignore()]
+
+    def tail(with_photo):
+        """Gemini 辨識 → 依人名＋公司存照片 → 寫回欄位 → 照片放進 Notion。
+        先辨識才存照片，檔名才能用名片上的人名和公司。有沒有合照分成兩條，因為模組上的篩選擋下就會停掉後面整條。"""
         ai = {"id": b.nid(), "module": "gemini-ai:makeApiCall", "version": 1, "parameters": {"__IMTCONN__": CONN_GEMINI},
               "mapper": {"url": f"/v1beta/models/{MODEL}:generateContent", "method": "POST",
                          "headers": [{"key": "Content-Type", "value": "application/json"}], "qs": [], "body": gemini_body()},
-              "metadata": b.meta("Gemini 辨識名片", "account:gemini-ai-q9zyjp"), "onerror": failed}
-        mods.append(ai)
+              "metadata": b.meta("Gemini 辨識名片", "account:gemini-ai-q9zyjp"), "onerror": failed_chain(with_photo, "辨識失敗")}
         parse = {"id": b.nid(), "module": "json:ParseJSON", "version": 1, "parameters": {"type": ""},
                  "mapper": {"json": "{{" + f"{ai['id']}.body.candidates[1].content.parts[1].text" + "}}"},
-                 "metadata": b.meta("解析辨識結果"),
-                 "onerror": [b.update("標成辨識失敗（解析）", f"{{{{{N}.id}}}}", [fv("狀態", "select", "辨識失敗")]), b.ignore()]}
-        mods.append(parse)
+                 "metadata": b.meta("解析辨識結果"), "onerror": failed_chain(with_photo, "解析失敗")}
         P = parse["id"]
+        # 檔名：人名_公司；讀不到人名就用請求編號，讀不到公司就寫「公司未辨識」
+        base = "{{ifempty(" + f"{P}.name; 1.rid)" + "}}_{{ifempty(" + f'{P}.company; "公司未辨識")' + "}}"
+        ups, link = save_photos(with_photo, base, "人名＋公司", guard=True)
         fields = [fv(n, t, "{{" + f"substring({P}.{k}; 0; {ln})" + "}}") for k, n, t, ln in AI_FIELDS]
         fields[0] = fv("姓名", "title", "{{ifempty(" + f"substring({P}.name; 0; 80)" + f'; "{PENDING_NAME}")' + "}}")
         fields += [fv("辨識原文", "rich_text", "{{" + f"substring({P}.raw; 0; 1900)" + "}}"), fv("狀態", "select", "待確認")]
-        mods.append(b.update("寫入辨識結果（待確認）", f"{{{{{N}.id}}}}", fields))
-        return mods
+        return [ai, parse] + ups + [b.update("寫入辨識結果（待確認）", f"{{{{{N}.id}}}}", fields), link]
 
     photo_router = lambda: b.router("有沒有合照", [
         (flt("有合照", [[c("{{1.photo}}", "exist")]]), tail(True)),

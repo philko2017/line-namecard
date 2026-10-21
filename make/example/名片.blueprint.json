@@ -32,14 +32,14 @@
    }
   },
   {
-   "id": 144,
+   "id": 156,
    "module": "builtin:BasicRouter",
    "version": 1,
    "mapper": null,
    "metadata": {
     "designer": {
      "x": 600,
-     "y": 5700,
+     "y": 7200,
      "name": "請求格式"
     }
    },
@@ -47,7 +47,7 @@
     {
      "flow": [
       {
-       "id": 140,
+       "id": 152,
        "module": "gateway:WebhookRespond",
        "version": 1,
        "parameters": {},
@@ -68,7 +68,7 @@
        "metadata": {
         "designer": {
          "x": 900,
-         "y": 5100,
+         "y": 6600,
          "name": "回傳格式不對"
         }
        },
@@ -215,14 +215,14 @@
        }
       },
       {
-       "id": 143,
+       "id": 155,
        "module": "builtin:BasicRouter",
        "version": 1,
        "mapper": null,
        "metadata": {
         "designer": {
          "x": 600,
-         "y": 5550,
+         "y": 7050,
          "name": "身分驗證"
         }
        },
@@ -230,7 +230,7 @@
         {
          "flow": [
           {
-           "id": 141,
+           "id": 153,
            "module": "gateway:WebhookRespond",
            "version": 1,
            "parameters": {},
@@ -251,7 +251,7 @@
            "metadata": {
             "designer": {
              "x": 900,
-             "y": 5250,
+             "y": 6750,
              "name": "回傳驗證失敗"
             }
            },
@@ -361,14 +361,14 @@
            }
           },
           {
-           "id": 142,
+           "id": 154,
            "module": "builtin:BasicRouter",
            "version": 1,
            "mapper": null,
            "metadata": {
             "designer": {
              "x": 600,
-             "y": 5400,
+             "y": 6900,
              "name": "依動作分流"
             }
            },
@@ -425,14 +425,14 @@
                }
               },
               {
-               "id": 130,
+               "id": 142,
                "module": "builtin:BasicRouter",
                "version": 1,
                "mapper": null,
                "metadata": {
                 "designer": {
                  "x": 600,
-                 "y": 3600,
+                 "y": 5100,
                  "name": "是否重複送出"
                 }
                },
@@ -588,14 +588,14 @@
                    }
                   },
                   {
-                   "id": 128,
+                   "id": 140,
                    "module": "builtin:BasicRouter",
                    "version": 1,
                    "mapper": null,
                    "metadata": {
                     "designer": {
                      "x": 600,
-                     "y": 3300,
+                     "y": 4800,
                      "name": "有沒有合照"
                     }
                    },
@@ -604,113 +604,6 @@
                      "flow": [
                       {
                        "id": 109,
-                       "module": "google-drive:uploadAFile",
-                       "version": 4,
-                       "parameters": {
-                        "__IMTCONN__": 0
-                       },
-                       "mapper": {
-                        "select": "map",
-                        "folderId": "Google 雲端硬碟資料夾 ID（資料夾要設成「知道連結的人都能檢視」）",
-                        "filename": "{{1.rid}}_名片.jpg",
-                        "data": "{{toBinary(1.card; \"base64\")}}",
-                        "convert": false
-                       },
-                       "metadata": {
-                        "designer": {
-                         "x": 900,
-                         "y": 1050,
-                         "name": "名片照片存到雲端硬碟"
-                        },
-                        "parameters": [
-                         {
-                          "name": "__IMTCONN__",
-                          "type": "account:google-restricted,google-drive",
-                          "label": "Connection",
-                          "required": true
-                         }
-                        ]
-                       },
-                       "filter": {
-                        "name": "有合照",
-                        "conditions": [
-                         [
-                          {
-                           "a": "{{1.photo}}",
-                           "o": "exist"
-                          }
-                         ]
-                        ]
-                       }
-                      },
-                      {
-                       "id": 110,
-                       "module": "google-drive:uploadAFile",
-                       "version": 4,
-                       "parameters": {
-                        "__IMTCONN__": 0
-                       },
-                       "mapper": {
-                        "select": "map",
-                        "folderId": "Google 雲端硬碟資料夾 ID（資料夾要設成「知道連結的人都能檢視」）",
-                        "filename": "{{1.rid}}_合照.jpg",
-                        "data": "{{toBinary(1.photo; \"base64\")}}",
-                        "convert": false
-                       },
-                       "metadata": {
-                        "designer": {
-                         "x": 900,
-                         "y": 1200,
-                         "name": "合照存到雲端硬碟"
-                        },
-                        "parameters": [
-                         {
-                          "name": "__IMTCONN__",
-                          "type": "account:google-restricted,google-drive",
-                          "label": "Connection",
-                          "required": true
-                         }
-                        ]
-                       }
-                      },
-                      {
-                       "id": 111,
-                       "module": "notion:makeApiCall",
-                       "version": 1,
-                       "mapper": {
-                        "url": "/v1/pages/{{106.id}}",
-                        "method": "PATCH",
-                        "version": "2022-06-28",
-                        "headers": [
-                         {
-                          "key": "Content-Type",
-                          "value": "application/json"
-                         }
-                        ],
-                        "qs": [],
-                        "body": "{\"properties\": {\"名片照片\": {\"files\": [{\"name\": \"名片.jpg\", \"type\": \"external\", \"external\": {\"url\": \"https://drive.google.com/thumbnail?id={{109.id}}&sz=w1600\"}}]}, \"名片照片連結\": {\"url\": \"{{109.webViewLink}}\"}, \"合照\": {\"files\": [{\"name\": \"合照.jpg\", \"type\": \"external\", \"external\": {\"url\": \"https://drive.google.com/thumbnail?id={{110.id}}&sz=w1600\"}}]}, \"合照連結\": {\"url\": \"{{110.webViewLink}}\"}}}"
-                       },
-                       "metadata": {
-                        "designer": {
-                         "x": 900,
-                         "y": 1350,
-                         "name": "照片放進名片"
-                        },
-                        "parameters": [
-                         {
-                          "name": "__IMTCONN__",
-                          "type": "account:notion2,notion3",
-                          "label": "Connection",
-                          "required": true
-                         }
-                        ]
-                       },
-                       "parameters": {
-                        "__IMTCONN__": 0
-                       }
-                      },
-                      {
-                       "id": 114,
                        "module": "gemini-ai:makeApiCall",
                        "version": 1,
                        "parameters": {
@@ -751,7 +644,7 @@
                        "metadata": {
                         "designer": {
                          "x": 900,
-                         "y": 1650,
+                         "y": 1050,
                          "name": "Gemini 辨識名片"
                         },
                         "parameters": [
@@ -765,7 +658,67 @@
                        },
                        "onerror": [
                         {
-                         "id": 112,
+                         "id": 110,
+                         "module": "google-drive:uploadAFile",
+                         "version": 4,
+                         "parameters": {
+                          "__IMTCONN__": 0
+                         },
+                         "mapper": {
+                          "select": "map",
+                          "folderId": "Google 雲端硬碟資料夾 ID（資料夾要設成「知道連結的人都能檢視」）",
+                          "filename": "{{1.rid}}_名片.jpg",
+                          "data": "{{toBinary(1.card; \"base64\")}}",
+                          "convert": false
+                         },
+                         "metadata": {
+                          "designer": {
+                           "x": 900,
+                           "y": 1200,
+                           "name": "名片照片存到雲端硬碟（辨識失敗）"
+                          },
+                          "parameters": [
+                           {
+                            "name": "__IMTCONN__",
+                            "type": "account:google-restricted,google-drive",
+                            "label": "Connection",
+                            "required": true
+                           }
+                          ]
+                         }
+                        },
+                        {
+                         "id": 111,
+                         "module": "google-drive:uploadAFile",
+                         "version": 4,
+                         "parameters": {
+                          "__IMTCONN__": 0
+                         },
+                         "mapper": {
+                          "select": "map",
+                          "folderId": "Google 雲端硬碟資料夾 ID（資料夾要設成「知道連結的人都能檢視」）",
+                          "filename": "{{1.rid}}_合照.jpg",
+                          "data": "{{toBinary(1.photo; \"base64\")}}",
+                          "convert": false
+                         },
+                         "metadata": {
+                          "designer": {
+                           "x": 900,
+                           "y": 1350,
+                           "name": "合照存到雲端硬碟（辨識失敗）"
+                          },
+                          "parameters": [
+                           {
+                            "name": "__IMTCONN__",
+                            "type": "account:google-restricted,google-drive",
+                            "label": "Connection",
+                            "required": true
+                           }
+                          ]
+                         }
+                        },
+                        {
+                         "id": 113,
                          "module": "notion:updateADatabaseItem",
                          "version": 1,
                          "mapper": {
@@ -784,8 +737,8 @@
                          "metadata": {
                           "designer": {
                            "x": 900,
-                           "y": 1500,
-                           "name": "標成辨識失敗"
+                           "y": 1650,
+                           "name": "標成辨識失敗（辨識失敗）"
                           },
                           "parameters": [
                            {
@@ -801,18 +754,65 @@
                          }
                         },
                         {
-                         "id": 113,
+                         "id": 112,
+                         "module": "notion:makeApiCall",
+                         "version": 1,
+                         "mapper": {
+                          "url": "/v1/pages/{{106.id}}",
+                          "method": "PATCH",
+                          "version": "2022-06-28",
+                          "headers": [
+                           {
+                            "key": "Content-Type",
+                            "value": "application/json"
+                           }
+                          ],
+                          "qs": [],
+                          "body": "{\"properties\": {\"名片照片\": {\"files\": [{\"name\": \"{{110.name}}\", \"type\": \"external\", \"external\": {\"url\": \"https://drive.google.com/thumbnail?id={{110.id}}&sz=w1600\"}}]}, \"名片照片連結\": {\"url\": \"{{110.webViewLink}}\"}, \"合照\": {\"files\": [{\"name\": \"{{111.name}}\", \"type\": \"external\", \"external\": {\"url\": \"https://drive.google.com/thumbnail?id={{111.id}}&sz=w1600\"}}]}, \"合照連結\": {\"url\": \"{{111.webViewLink}}\"}}}"
+                         },
+                         "metadata": {
+                          "designer": {
+                           "x": 900,
+                           "y": 1500,
+                           "name": "照片放進名片（辨識失敗）"
+                          },
+                          "parameters": [
+                           {
+                            "name": "__IMTCONN__",
+                            "type": "account:notion2,notion3",
+                            "label": "Connection",
+                            "required": true
+                           }
+                          ]
+                         },
+                         "parameters": {
+                          "__IMTCONN__": 0
+                         }
+                        },
+                        {
+                         "id": 114,
                          "module": "builtin:Ignore",
                          "version": 1,
                          "mapper": null,
                          "metadata": {
                           "designer": {
                            "x": 1200,
-                           "y": 1500
+                           "y": 1650
                           }
                          }
                         }
-                       ]
+                       ],
+                       "filter": {
+                        "name": "有合照",
+                        "conditions": [
+                         [
+                          {
+                           "a": "{{1.photo}}",
+                           "o": "exist"
+                          }
+                         ]
+                        ]
+                       }
                       },
                       {
                        "id": 115,
@@ -822,7 +822,7 @@
                         "type": ""
                        },
                        "mapper": {
-                        "json": "{{114.body.candidates[1].content.parts[1].text}}"
+                        "json": "{{109.body.candidates[1].content.parts[1].text}}"
                        },
                        "metadata": {
                         "designer": {
@@ -834,6 +834,66 @@
                        "onerror": [
                         {
                          "id": 116,
+                         "module": "google-drive:uploadAFile",
+                         "version": 4,
+                         "parameters": {
+                          "__IMTCONN__": 0
+                         },
+                         "mapper": {
+                          "select": "map",
+                          "folderId": "Google 雲端硬碟資料夾 ID（資料夾要設成「知道連結的人都能檢視」）",
+                          "filename": "{{1.rid}}_名片.jpg",
+                          "data": "{{toBinary(1.card; \"base64\")}}",
+                          "convert": false
+                         },
+                         "metadata": {
+                          "designer": {
+                           "x": 900,
+                           "y": 1950,
+                           "name": "名片照片存到雲端硬碟（解析失敗）"
+                          },
+                          "parameters": [
+                           {
+                            "name": "__IMTCONN__",
+                            "type": "account:google-restricted,google-drive",
+                            "label": "Connection",
+                            "required": true
+                           }
+                          ]
+                         }
+                        },
+                        {
+                         "id": 117,
+                         "module": "google-drive:uploadAFile",
+                         "version": 4,
+                         "parameters": {
+                          "__IMTCONN__": 0
+                         },
+                         "mapper": {
+                          "select": "map",
+                          "folderId": "Google 雲端硬碟資料夾 ID（資料夾要設成「知道連結的人都能檢視」）",
+                          "filename": "{{1.rid}}_合照.jpg",
+                          "data": "{{toBinary(1.photo; \"base64\")}}",
+                          "convert": false
+                         },
+                         "metadata": {
+                          "designer": {
+                           "x": 900,
+                           "y": 2100,
+                           "name": "合照存到雲端硬碟（解析失敗）"
+                          },
+                          "parameters": [
+                           {
+                            "name": "__IMTCONN__",
+                            "type": "account:google-restricted,google-drive",
+                            "label": "Connection",
+                            "required": true
+                           }
+                          ]
+                         }
+                        },
+                        {
+                         "id": 119,
                          "module": "notion:updateADatabaseItem",
                          "version": 1,
                          "mapper": {
@@ -852,8 +912,8 @@
                          "metadata": {
                           "designer": {
                            "x": 900,
-                           "y": 1950,
-                           "name": "標成辨識失敗（解析）"
+                           "y": 2400,
+                           "name": "標成辨識失敗（解析失敗）"
                           },
                           "parameters": [
                            {
@@ -869,21 +929,117 @@
                          }
                         },
                         {
-                         "id": 117,
+                         "id": 118,
+                         "module": "notion:makeApiCall",
+                         "version": 1,
+                         "mapper": {
+                          "url": "/v1/pages/{{106.id}}",
+                          "method": "PATCH",
+                          "version": "2022-06-28",
+                          "headers": [
+                           {
+                            "key": "Content-Type",
+                            "value": "application/json"
+                           }
+                          ],
+                          "qs": [],
+                          "body": "{\"properties\": {\"名片照片\": {\"files\": [{\"name\": \"{{116.name}}\", \"type\": \"external\", \"external\": {\"url\": \"https://drive.google.com/thumbnail?id={{116.id}}&sz=w1600\"}}]}, \"名片照片連結\": {\"url\": \"{{116.webViewLink}}\"}, \"合照\": {\"files\": [{\"name\": \"{{117.name}}\", \"type\": \"external\", \"external\": {\"url\": \"https://drive.google.com/thumbnail?id={{117.id}}&sz=w1600\"}}]}, \"合照連結\": {\"url\": \"{{117.webViewLink}}\"}}}"
+                         },
+                         "metadata": {
+                          "designer": {
+                           "x": 900,
+                           "y": 2250,
+                           "name": "照片放進名片（解析失敗）"
+                          },
+                          "parameters": [
+                           {
+                            "name": "__IMTCONN__",
+                            "type": "account:notion2,notion3",
+                            "label": "Connection",
+                            "required": true
+                           }
+                          ]
+                         },
+                         "parameters": {
+                          "__IMTCONN__": 0
+                         }
+                        },
+                        {
+                         "id": 120,
                          "module": "builtin:Ignore",
                          "version": 1,
                          "mapper": null,
                          "metadata": {
                           "designer": {
                            "x": 1200,
-                           "y": 1950
+                           "y": 2400
                           }
                          }
                         }
                        ]
                       },
                       {
-                       "id": 118,
+                       "id": 121,
+                       "module": "google-drive:uploadAFile",
+                       "version": 4,
+                       "parameters": {
+                        "__IMTCONN__": 0
+                       },
+                       "mapper": {
+                        "select": "map",
+                        "folderId": "Google 雲端硬碟資料夾 ID（資料夾要設成「知道連結的人都能檢視」）",
+                        "filename": "{{ifempty(115.name; 1.rid)}}_{{ifempty(115.company; \"公司未辨識\")}}_名片.jpg",
+                        "data": "{{toBinary(1.card; \"base64\")}}",
+                        "convert": false
+                       },
+                       "metadata": {
+                        "designer": {
+                         "x": 900,
+                         "y": 2550,
+                         "name": "名片照片存到雲端硬碟（人名＋公司）"
+                        },
+                        "parameters": [
+                         {
+                          "name": "__IMTCONN__",
+                          "type": "account:google-restricted,google-drive",
+                          "label": "Connection",
+                          "required": true
+                         }
+                        ]
+                       }
+                      },
+                      {
+                       "id": 122,
+                       "module": "google-drive:uploadAFile",
+                       "version": 4,
+                       "parameters": {
+                        "__IMTCONN__": 0
+                       },
+                       "mapper": {
+                        "select": "map",
+                        "folderId": "Google 雲端硬碟資料夾 ID（資料夾要設成「知道連結的人都能檢視」）",
+                        "filename": "{{ifempty(115.name; 1.rid)}}_{{ifempty(115.company; \"公司未辨識\")}}_合照.jpg",
+                        "data": "{{toBinary(1.photo; \"base64\")}}",
+                        "convert": false
+                       },
+                       "metadata": {
+                        "designer": {
+                         "x": 900,
+                         "y": 2700,
+                         "name": "合照存到雲端硬碟（人名＋公司）"
+                        },
+                        "parameters": [
+                         {
+                          "name": "__IMTCONN__",
+                          "type": "account:google-restricted,google-drive",
+                          "label": "Connection",
+                          "required": true
+                         }
+                        ]
+                       }
+                      },
+                      {
+                       "id": 125,
                        "module": "notion:updateADatabaseItem",
                        "version": 1,
                        "mapper": {
@@ -957,89 +1113,8 @@
                        "metadata": {
                         "designer": {
                          "x": 900,
-                         "y": 2100,
+                         "y": 3000,
                          "name": "寫入辨識結果（待確認）"
-                        },
-                        "parameters": [
-                         {
-                          "name": "__IMTCONN__",
-                          "type": "account:notion2,notion3",
-                          "label": "Connection",
-                          "required": true
-                         }
-                        ]
-                       },
-                       "parameters": {
-                        "__IMTCONN__": 0
-                       }
-                      }
-                     ]
-                    },
-                    {
-                     "flow": [
-                      {
-                       "id": 119,
-                       "module": "google-drive:uploadAFile",
-                       "version": 4,
-                       "parameters": {
-                        "__IMTCONN__": 0
-                       },
-                       "mapper": {
-                        "select": "map",
-                        "folderId": "Google 雲端硬碟資料夾 ID（資料夾要設成「知道連結的人都能檢視」）",
-                        "filename": "{{1.rid}}_名片.jpg",
-                        "data": "{{toBinary(1.card; \"base64\")}}",
-                        "convert": false
-                       },
-                       "metadata": {
-                        "designer": {
-                         "x": 900,
-                         "y": 2250,
-                         "name": "名片照片存到雲端硬碟"
-                        },
-                        "parameters": [
-                         {
-                          "name": "__IMTCONN__",
-                          "type": "account:google-restricted,google-drive",
-                          "label": "Connection",
-                          "required": true
-                         }
-                        ]
-                       },
-                       "filter": {
-                        "name": "沒有合照",
-                        "conditions": [
-                         [
-                          {
-                           "a": "{{1.photo}}",
-                           "o": "notexist"
-                          }
-                         ]
-                        ]
-                       }
-                      },
-                      {
-                       "id": 120,
-                       "module": "notion:makeApiCall",
-                       "version": 1,
-                       "mapper": {
-                        "url": "/v1/pages/{{106.id}}",
-                        "method": "PATCH",
-                        "version": "2022-06-28",
-                        "headers": [
-                         {
-                          "key": "Content-Type",
-                          "value": "application/json"
-                         }
-                        ],
-                        "qs": [],
-                        "body": "{\"properties\": {\"名片照片\": {\"files\": [{\"name\": \"名片.jpg\", \"type\": \"external\", \"external\": {\"url\": \"https://drive.google.com/thumbnail?id={{119.id}}&sz=w1600\"}}]}, \"名片照片連結\": {\"url\": \"{{119.webViewLink}}\"}}}"
-                       },
-                       "metadata": {
-                        "designer": {
-                         "x": 900,
-                         "y": 2400,
-                         "name": "照片放進名片"
                         },
                         "parameters": [
                          {
@@ -1056,6 +1131,60 @@
                       },
                       {
                        "id": 123,
+                       "module": "notion:makeApiCall",
+                       "version": 1,
+                       "mapper": {
+                        "url": "/v1/pages/{{106.id}}",
+                        "method": "PATCH",
+                        "version": "2022-06-28",
+                        "headers": [
+                         {
+                          "key": "Content-Type",
+                          "value": "application/json"
+                         }
+                        ],
+                        "qs": [],
+                        "body": "{\"properties\": {\"名片照片\": {\"files\": [{\"name\": \"{{121.name}}\", \"type\": \"external\", \"external\": {\"url\": \"https://drive.google.com/thumbnail?id={{121.id}}&sz=w1600\"}}]}, \"名片照片連結\": {\"url\": \"{{121.webViewLink}}\"}, \"合照\": {\"files\": [{\"name\": \"{{122.name}}\", \"type\": \"external\", \"external\": {\"url\": \"https://drive.google.com/thumbnail?id={{122.id}}&sz=w1600\"}}]}, \"合照連結\": {\"url\": \"{{122.webViewLink}}\"}}}"
+                       },
+                       "metadata": {
+                        "designer": {
+                         "x": 900,
+                         "y": 2850,
+                         "name": "照片放進名片（人名＋公司）"
+                        },
+                        "parameters": [
+                         {
+                          "name": "__IMTCONN__",
+                          "type": "account:notion2,notion3",
+                          "label": "Connection",
+                          "required": true
+                         }
+                        ]
+                       },
+                       "parameters": {
+                        "__IMTCONN__": 0
+                       },
+                       "onerror": [
+                        {
+                         "id": 124,
+                         "module": "builtin:Ignore",
+                         "version": 1,
+                         "mapper": null,
+                         "metadata": {
+                          "designer": {
+                           "x": 1200,
+                           "y": 2850
+                          }
+                         }
+                        }
+                       ]
+                      }
+                     ]
+                    },
+                    {
+                     "flow": [
+                      {
+                       "id": 126,
                        "module": "gemini-ai:makeApiCall",
                        "version": 1,
                        "parameters": {
@@ -1096,7 +1225,7 @@
                        "metadata": {
                         "designer": {
                          "x": 900,
-                         "y": 2700,
+                         "y": 3150,
                          "name": "Gemini 辨識名片"
                         },
                         "parameters": [
@@ -1110,7 +1239,37 @@
                        },
                        "onerror": [
                         {
-                         "id": 121,
+                         "id": 127,
+                         "module": "google-drive:uploadAFile",
+                         "version": 4,
+                         "parameters": {
+                          "__IMTCONN__": 0
+                         },
+                         "mapper": {
+                          "select": "map",
+                          "folderId": "Google 雲端硬碟資料夾 ID（資料夾要設成「知道連結的人都能檢視」）",
+                          "filename": "{{1.rid}}_名片.jpg",
+                          "data": "{{toBinary(1.card; \"base64\")}}",
+                          "convert": false
+                         },
+                         "metadata": {
+                          "designer": {
+                           "x": 900,
+                           "y": 3300,
+                           "name": "名片照片存到雲端硬碟（辨識失敗）"
+                          },
+                          "parameters": [
+                           {
+                            "name": "__IMTCONN__",
+                            "type": "account:google-restricted,google-drive",
+                            "label": "Connection",
+                            "required": true
+                           }
+                          ]
+                         }
+                        },
+                        {
+                         "id": 129,
                          "module": "notion:updateADatabaseItem",
                          "version": 1,
                          "mapper": {
@@ -1129,8 +1288,8 @@
                          "metadata": {
                           "designer": {
                            "x": 900,
-                           "y": 2550,
-                           "name": "標成辨識失敗"
+                           "y": 3600,
+                           "name": "標成辨識失敗（辨識失敗）"
                           },
                           "parameters": [
                            {
@@ -1146,39 +1305,116 @@
                          }
                         },
                         {
-                         "id": 122,
+                         "id": 128,
+                         "module": "notion:makeApiCall",
+                         "version": 1,
+                         "mapper": {
+                          "url": "/v1/pages/{{106.id}}",
+                          "method": "PATCH",
+                          "version": "2022-06-28",
+                          "headers": [
+                           {
+                            "key": "Content-Type",
+                            "value": "application/json"
+                           }
+                          ],
+                          "qs": [],
+                          "body": "{\"properties\": {\"名片照片\": {\"files\": [{\"name\": \"{{127.name}}\", \"type\": \"external\", \"external\": {\"url\": \"https://drive.google.com/thumbnail?id={{127.id}}&sz=w1600\"}}]}, \"名片照片連結\": {\"url\": \"{{127.webViewLink}}\"}}}"
+                         },
+                         "metadata": {
+                          "designer": {
+                           "x": 900,
+                           "y": 3450,
+                           "name": "照片放進名片（辨識失敗）"
+                          },
+                          "parameters": [
+                           {
+                            "name": "__IMTCONN__",
+                            "type": "account:notion2,notion3",
+                            "label": "Connection",
+                            "required": true
+                           }
+                          ]
+                         },
+                         "parameters": {
+                          "__IMTCONN__": 0
+                         }
+                        },
+                        {
+                         "id": 130,
                          "module": "builtin:Ignore",
                          "version": 1,
                          "mapper": null,
                          "metadata": {
                           "designer": {
                            "x": 1200,
-                           "y": 2550
+                           "y": 3600
                           }
                          }
                         }
-                       ]
+                       ],
+                       "filter": {
+                        "name": "沒有合照",
+                        "conditions": [
+                         [
+                          {
+                           "a": "{{1.photo}}",
+                           "o": "notexist"
+                          }
+                         ]
+                        ]
+                       }
                       },
                       {
-                       "id": 124,
+                       "id": 131,
                        "module": "json:ParseJSON",
                        "version": 1,
                        "parameters": {
                         "type": ""
                        },
                        "mapper": {
-                        "json": "{{123.body.candidates[1].content.parts[1].text}}"
+                        "json": "{{126.body.candidates[1].content.parts[1].text}}"
                        },
                        "metadata": {
                         "designer": {
                          "x": 900,
-                         "y": 2850,
+                         "y": 3750,
                          "name": "解析辨識結果"
                         }
                        },
                        "onerror": [
                         {
-                         "id": 125,
+                         "id": 132,
+                         "module": "google-drive:uploadAFile",
+                         "version": 4,
+                         "parameters": {
+                          "__IMTCONN__": 0
+                         },
+                         "mapper": {
+                          "select": "map",
+                          "folderId": "Google 雲端硬碟資料夾 ID（資料夾要設成「知道連結的人都能檢視」）",
+                          "filename": "{{1.rid}}_名片.jpg",
+                          "data": "{{toBinary(1.card; \"base64\")}}",
+                          "convert": false
+                         },
+                         "metadata": {
+                          "designer": {
+                           "x": 900,
+                           "y": 3900,
+                           "name": "名片照片存到雲端硬碟（解析失敗）"
+                          },
+                          "parameters": [
+                           {
+                            "name": "__IMTCONN__",
+                            "type": "account:google-restricted,google-drive",
+                            "label": "Connection",
+                            "required": true
+                           }
+                          ]
+                         }
+                        },
+                        {
+                         "id": 134,
                          "module": "notion:updateADatabaseItem",
                          "version": 1,
                          "mapper": {
@@ -1197,8 +1433,8 @@
                          "metadata": {
                           "designer": {
                            "x": 900,
-                           "y": 3000,
-                           "name": "標成辨識失敗（解析）"
+                           "y": 4200,
+                           "name": "標成辨識失敗（解析失敗）"
                           },
                           "parameters": [
                            {
@@ -1214,21 +1450,87 @@
                          }
                         },
                         {
-                         "id": 126,
+                         "id": 133,
+                         "module": "notion:makeApiCall",
+                         "version": 1,
+                         "mapper": {
+                          "url": "/v1/pages/{{106.id}}",
+                          "method": "PATCH",
+                          "version": "2022-06-28",
+                          "headers": [
+                           {
+                            "key": "Content-Type",
+                            "value": "application/json"
+                           }
+                          ],
+                          "qs": [],
+                          "body": "{\"properties\": {\"名片照片\": {\"files\": [{\"name\": \"{{132.name}}\", \"type\": \"external\", \"external\": {\"url\": \"https://drive.google.com/thumbnail?id={{132.id}}&sz=w1600\"}}]}, \"名片照片連結\": {\"url\": \"{{132.webViewLink}}\"}}}"
+                         },
+                         "metadata": {
+                          "designer": {
+                           "x": 900,
+                           "y": 4050,
+                           "name": "照片放進名片（解析失敗）"
+                          },
+                          "parameters": [
+                           {
+                            "name": "__IMTCONN__",
+                            "type": "account:notion2,notion3",
+                            "label": "Connection",
+                            "required": true
+                           }
+                          ]
+                         },
+                         "parameters": {
+                          "__IMTCONN__": 0
+                         }
+                        },
+                        {
+                         "id": 135,
                          "module": "builtin:Ignore",
                          "version": 1,
                          "mapper": null,
                          "metadata": {
                           "designer": {
                            "x": 1200,
-                           "y": 3000
+                           "y": 4200
                           }
                          }
                         }
                        ]
                       },
                       {
-                       "id": 127,
+                       "id": 136,
+                       "module": "google-drive:uploadAFile",
+                       "version": 4,
+                       "parameters": {
+                        "__IMTCONN__": 0
+                       },
+                       "mapper": {
+                        "select": "map",
+                        "folderId": "Google 雲端硬碟資料夾 ID（資料夾要設成「知道連結的人都能檢視」）",
+                        "filename": "{{ifempty(131.name; 1.rid)}}_{{ifempty(131.company; \"公司未辨識\")}}_名片.jpg",
+                        "data": "{{toBinary(1.card; \"base64\")}}",
+                        "convert": false
+                       },
+                       "metadata": {
+                        "designer": {
+                         "x": 900,
+                         "y": 4350,
+                         "name": "名片照片存到雲端硬碟（人名＋公司）"
+                        },
+                        "parameters": [
+                         {
+                          "name": "__IMTCONN__",
+                          "type": "account:google-restricted,google-drive",
+                          "label": "Connection",
+                          "required": true
+                         }
+                        ]
+                       }
+                      },
+                      {
+                       "id": 139,
                        "module": "notion:updateADatabaseItem",
                        "version": 1,
                        "mapper": {
@@ -1237,57 +1539,57 @@
                          {
                           "key": "姓名",
                           "type": "title",
-                          "value": "{{ifempty(substring(124.name; 0; 80); \"（待辨識）\")}}"
+                          "value": "{{ifempty(substring(131.name; 0; 80); \"（待辨識）\")}}"
                          },
                          {
                           "key": "公司",
                           "type": "rich_text",
-                          "value": "{{substring(124.company; 0; 120)}}"
+                          "value": "{{substring(131.company; 0; 120)}}"
                          },
                          {
                           "key": "職稱",
                           "type": "rich_text",
-                          "value": "{{substring(124.title; 0; 80)}}"
+                          "value": "{{substring(131.title; 0; 80)}}"
                          },
                          {
                           "key": "部門",
                           "type": "rich_text",
-                          "value": "{{substring(124.dept; 0; 80)}}"
+                          "value": "{{substring(131.dept; 0; 80)}}"
                          },
                          {
                           "key": "手機",
                           "type": "phone_number",
-                          "value": "{{substring(124.mobile; 0; 60)}}"
+                          "value": "{{substring(131.mobile; 0; 60)}}"
                          },
                          {
                           "key": "電話",
                           "type": "phone_number",
-                          "value": "{{substring(124.phone; 0; 60)}}"
+                          "value": "{{substring(131.phone; 0; 60)}}"
                          },
                          {
                           "key": "Email",
                           "type": "email",
-                          "value": "{{substring(124.email; 0; 120)}}"
+                          "value": "{{substring(131.email; 0; 120)}}"
                          },
                          {
                           "key": "地址",
                           "type": "rich_text",
-                          "value": "{{substring(124.address; 0; 200)}}"
+                          "value": "{{substring(131.address; 0; 200)}}"
                          },
                          {
                           "key": "網站",
                           "type": "url",
-                          "value": "{{substring(124.web; 0; 200)}}"
+                          "value": "{{substring(131.web; 0; 200)}}"
                          },
                          {
                           "key": "其他聯絡方式",
                           "type": "rich_text",
-                          "value": "{{substring(124.other; 0; 300)}}"
+                          "value": "{{substring(131.other; 0; 300)}}"
                          },
                          {
                           "key": "辨識原文",
                           "type": "rich_text",
-                          "value": "{{substring(124.raw; 0; 1900)}}"
+                          "value": "{{substring(131.raw; 0; 1900)}}"
                          },
                          {
                           "key": "狀態",
@@ -1302,7 +1604,7 @@
                        "metadata": {
                         "designer": {
                          "x": 900,
-                         "y": 3150,
+                         "y": 4650,
                          "name": "寫入辨識結果（待確認）"
                         },
                         "parameters": [
@@ -1317,6 +1619,56 @@
                        "parameters": {
                         "__IMTCONN__": 0
                        }
+                      },
+                      {
+                       "id": 137,
+                       "module": "notion:makeApiCall",
+                       "version": 1,
+                       "mapper": {
+                        "url": "/v1/pages/{{106.id}}",
+                        "method": "PATCH",
+                        "version": "2022-06-28",
+                        "headers": [
+                         {
+                          "key": "Content-Type",
+                          "value": "application/json"
+                         }
+                        ],
+                        "qs": [],
+                        "body": "{\"properties\": {\"名片照片\": {\"files\": [{\"name\": \"{{136.name}}\", \"type\": \"external\", \"external\": {\"url\": \"https://drive.google.com/thumbnail?id={{136.id}}&sz=w1600\"}}]}, \"名片照片連結\": {\"url\": \"{{136.webViewLink}}\"}}}"
+                       },
+                       "metadata": {
+                        "designer": {
+                         "x": 900,
+                         "y": 4500,
+                         "name": "照片放進名片（人名＋公司）"
+                        },
+                        "parameters": [
+                         {
+                          "name": "__IMTCONN__",
+                          "type": "account:notion2,notion3",
+                          "label": "Connection",
+                          "required": true
+                         }
+                        ]
+                       },
+                       "parameters": {
+                        "__IMTCONN__": 0
+                       },
+                       "onerror": [
+                        {
+                         "id": 138,
+                         "module": "builtin:Ignore",
+                         "version": 1,
+                         "mapper": null,
+                         "metadata": {
+                          "designer": {
+                           "x": 1200,
+                           "y": 4500
+                          }
+                         }
+                        }
+                       ]
                       }
                      ]
                     }
@@ -1327,7 +1679,7 @@
                 {
                  "flow": [
                   {
-                   "id": 129,
+                   "id": 141,
                    "module": "gateway:WebhookRespond",
                    "version": 1,
                    "parameters": {},
@@ -1348,7 +1700,7 @@
                    "metadata": {
                     "designer": {
                      "x": 900,
-                     "y": 3450,
+                     "y": 4950,
                      "name": "回傳缺名片照片"
                     }
                    },
@@ -1377,7 +1729,7 @@
             {
              "flow": [
               {
-               "id": 131,
+               "id": 143,
                "module": "notion:searchObjects1",
                "version": 1,
                "mapper": {
@@ -1404,7 +1756,7 @@
                "metadata": {
                 "designer": {
                  "x": 900,
-                 "y": 3750,
+                 "y": 5250,
                  "name": "找我拍的名片"
                 },
                 "parameters": [
@@ -1433,51 +1785,51 @@
                }
               },
               {
-               "id": 132,
+               "id": 144,
                "module": "builtin:BasicAggregator",
                "version": 1,
                "parameters": {
-                "feeder": 131
+                "feeder": 143
                },
                "mapper": {
-                "id": "{{131.id}}",
-                "created_time": "{{131.created_time}}",
-                "properties_value": "{{131.properties_value}}"
+                "id": "{{143.id}}",
+                "created_time": "{{143.created_time}}",
+                "properties_value": "{{143.properties_value}}"
                },
                "metadata": {
                 "designer": {
                  "x": 900,
-                 "y": 3900,
+                 "y": 5400,
                  "name": "彙整名片"
                 }
                }
               },
               {
-               "id": 133,
+               "id": 145,
                "module": "json:TransformToJSON",
                "version": 1,
                "parameters": {
                 "space": ""
                },
                "mapper": {
-                "object": "{{132.array}}"
+                "object": "{{144.array}}"
                },
                "metadata": {
                 "designer": {
                  "x": 900,
-                 "y": 4050,
+                 "y": 5550,
                  "name": "名片轉成 JSON"
                 }
                }
               },
               {
-               "id": 134,
+               "id": 146,
                "module": "gateway:WebhookRespond",
                "version": 1,
                "parameters": {},
                "mapper": {
                 "status": "200",
-                "body": "{\"ok\":true,\"cards\":{{133.json}}}",
+                "body": "{\"ok\":true,\"cards\":{{145.json}}}",
                 "headers": [
                  {
                   "key": "Content-Type",
@@ -1492,7 +1844,7 @@
                "metadata": {
                 "designer": {
                  "x": 900,
-                 "y": 4200,
+                 "y": 5700,
                  "name": "回傳名片清單"
                 }
                }
@@ -1502,7 +1854,7 @@
             {
              "flow": [
               {
-               "id": 135,
+               "id": 147,
                "module": "notion:getADatabaseItem",
                "version": 1,
                "mapper": {
@@ -1513,7 +1865,7 @@
                "metadata": {
                 "designer": {
                  "x": 900,
-                 "y": 4350,
+                 "y": 5850,
                  "name": "讀這張名片"
                 },
                 "parameters": [
@@ -1542,14 +1894,14 @@
                }
               },
               {
-               "id": 139,
+               "id": 151,
                "module": "builtin:BasicRouter",
                "version": 1,
                "mapper": null,
                "metadata": {
                 "designer": {
                  "x": 600,
-                 "y": 4950,
+                 "y": 6450,
                  "name": "是不是自己拍的"
                 }
                },
@@ -1557,7 +1909,7 @@
                 {
                  "flow": [
                   {
-                   "id": 136,
+                   "id": 148,
                    "module": "notion:updateADatabaseItem",
                    "version": 1,
                    "mapper": {
@@ -1649,7 +2001,7 @@
                    "metadata": {
                     "designer": {
                      "x": 900,
-                     "y": 4500,
+                     "y": 6000,
                      "name": "確認存入"
                     },
                     "parameters": [
@@ -1669,7 +2021,7 @@
                     "conditions": [
                      [
                       {
-                       "a": "{{135.properties_value.`拍攝者 LINE ID`[].plain_text}}",
+                       "a": "{{147.properties_value.`拍攝者 LINE ID`[].plain_text}}",
                        "o": "text:equal",
                        "b": "{{4.data.userId}}"
                       },
@@ -1682,7 +2034,7 @@
                    }
                   },
                   {
-                   "id": 137,
+                   "id": 149,
                    "module": "gateway:WebhookRespond",
                    "version": 1,
                    "parameters": {},
@@ -1703,7 +2055,7 @@
                    "metadata": {
                     "designer": {
                      "x": 900,
-                     "y": 4650,
+                     "y": 6150,
                      "name": "回傳已存入"
                     }
                    }
@@ -1713,7 +2065,7 @@
                 {
                  "flow": [
                   {
-                   "id": 138,
+                   "id": 150,
                    "module": "gateway:WebhookRespond",
                    "version": 1,
                    "parameters": {},
@@ -1734,7 +2086,7 @@
                    "metadata": {
                     "designer": {
                      "x": 900,
-                     "y": 4800,
+                     "y": 6300,
                      "name": "回傳不是你的"
                     }
                    },
@@ -1743,7 +2095,7 @@
                     "conditions": [
                      [
                       {
-                       "a": "{{135.properties_value.`拍攝者 LINE ID`[].plain_text}}",
+                       "a": "{{147.properties_value.`拍攝者 LINE ID`[].plain_text}}",
                        "o": "text:notequal",
                        "b": "{{4.data.userId}}"
                       }
