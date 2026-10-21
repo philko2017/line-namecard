@@ -1,0 +1,1790 @@
+{
+ "name": "名片",
+ "flow": [
+  {
+   "id": 1,
+   "module": "gateway:CustomWebHook",
+   "version": 1,
+   "parameters": {
+    "hook": 0,
+    "maxResults": 1
+   },
+   "mapper": {},
+   "metadata": {
+    "designer": {
+     "x": -300,
+     "y": 0,
+     "name": "名片頁面送來的請求"
+    },
+    "parameters": [
+     {
+      "name": "hook",
+      "type": "hook:gateway-webhook",
+      "label": "Webhook",
+      "required": true
+     },
+     {
+      "name": "maxResults",
+      "type": "number",
+      "label": "Maximum number of results"
+     }
+    ]
+   }
+  },
+  {
+   "id": 144,
+   "module": "builtin:BasicRouter",
+   "version": 1,
+   "mapper": null,
+   "metadata": {
+    "designer": {
+     "x": 600,
+     "y": 5700,
+     "name": "請求格式"
+    }
+   },
+   "routes": [
+    {
+     "flow": [
+      {
+       "id": 140,
+       "module": "gateway:WebhookRespond",
+       "version": 1,
+       "parameters": {},
+       "mapper": {
+        "status": "400",
+        "body": "{\"ok\":false,\"error\":\"bad_request\"}",
+        "headers": [
+         {
+          "key": "Content-Type",
+          "value": "application/json; charset=utf-8"
+         },
+         {
+          "key": "Access-Control-Allow-Origin",
+          "value": "https://<GitHub 帳號>.github.io"
+         }
+        ]
+       },
+       "metadata": {
+        "designer": {
+         "x": 900,
+         "y": 5100,
+         "name": "回傳格式不對"
+        }
+       },
+       "filter": {
+        "name": "格式不對",
+        "conditions": [
+         [
+          {
+           "a": "{{1.t}}",
+           "o": "notexist"
+          }
+         ],
+         [
+          {
+           "a": "{{1.a}}",
+           "o": "text:notequal",
+           "b": "submit"
+          },
+          {
+           "a": "{{1.a}}",
+           "o": "text:notequal",
+           "b": "list"
+          },
+          {
+           "a": "{{1.a}}",
+           "o": "text:notequal",
+           "b": "save"
+          }
+         ]
+        ]
+       }
+      }
+     ]
+    },
+    {
+     "flow": [
+      {
+       "id": 2,
+       "module": "http:ActionSendData",
+       "version": 3,
+       "parameters": {
+        "handleErrors": false
+       },
+       "mapper": {
+        "url": "https://api.line.me/oauth2/v2.1/verify?access_token={{encodeURL(1.t)}}",
+        "method": "get",
+        "serializeUrl": false,
+        "shareCookies": false,
+        "parseResponse": true,
+        "headers": [],
+        "qs": [],
+        "rejectUnauthorized": true,
+        "followRedirect": true,
+        "followAllRedirects": false,
+        "useQuerystring": false,
+        "gzip": true,
+        "useMtls": false
+       },
+       "metadata": {
+        "designer": {
+         "x": 0,
+         "y": 0,
+         "name": "向 LINE 驗證 Access Token"
+        }
+       },
+       "onerror": [
+        {
+         "id": 101,
+         "module": "gateway:WebhookRespond",
+         "version": 1,
+         "parameters": {},
+         "mapper": {
+          "status": "401",
+          "body": "{\"ok\":false,\"error\":\"auth\"}",
+          "headers": [
+           {
+            "key": "Content-Type",
+            "value": "application/json; charset=utf-8"
+           },
+           {
+            "key": "Access-Control-Allow-Origin",
+            "value": "https://<GitHub 帳號>.github.io"
+           }
+          ]
+         },
+         "metadata": {
+          "designer": {
+           "x": 900,
+           "y": 150,
+           "name": "回傳驗證失敗（向 LINE 驗證 Access Token）"
+          }
+         }
+        },
+        {
+         "id": 102,
+         "module": "builtin:Ignore",
+         "version": 1,
+         "mapper": null,
+         "metadata": {
+          "designer": {
+           "x": 1200,
+           "y": 150
+          }
+         }
+        }
+       ],
+       "filter": {
+        "name": "格式正確",
+        "conditions": [
+         [
+          {
+           "a": "{{1.t}}",
+           "o": "exist"
+          },
+          {
+           "a": "{{1.a}}",
+           "o": "text:equal",
+           "b": "submit"
+          }
+         ],
+         [
+          {
+           "a": "{{1.t}}",
+           "o": "exist"
+          },
+          {
+           "a": "{{1.a}}",
+           "o": "text:equal",
+           "b": "list"
+          }
+         ],
+         [
+          {
+           "a": "{{1.t}}",
+           "o": "exist"
+          },
+          {
+           "a": "{{1.a}}",
+           "o": "text:equal",
+           "b": "save"
+          }
+         ]
+        ]
+       }
+      },
+      {
+       "id": 143,
+       "module": "builtin:BasicRouter",
+       "version": 1,
+       "mapper": null,
+       "metadata": {
+        "designer": {
+         "x": 600,
+         "y": 5550,
+         "name": "身分驗證"
+        }
+       },
+       "routes": [
+        {
+         "flow": [
+          {
+           "id": 141,
+           "module": "gateway:WebhookRespond",
+           "version": 1,
+           "parameters": {},
+           "mapper": {
+            "status": "401",
+            "body": "{\"ok\":false,\"error\":\"auth\"}",
+            "headers": [
+             {
+              "key": "Content-Type",
+              "value": "application/json; charset=utf-8"
+             },
+             {
+              "key": "Access-Control-Allow-Origin",
+              "value": "https://<GitHub 帳號>.github.io"
+             }
+            ]
+           },
+           "metadata": {
+            "designer": {
+             "x": 900,
+             "y": 5250,
+             "name": "回傳驗證失敗"
+            }
+           },
+           "filter": {
+            "name": "不是本系統的憑證",
+            "conditions": [
+             [
+              {
+               "a": "{{2.data.client_id}}",
+               "o": "text:notequal",
+               "b": "LINE Login channel 的 Channel ID"
+              }
+             ]
+            ]
+           }
+          }
+         ]
+        },
+        {
+         "flow": [
+          {
+           "id": 4,
+           "module": "http:ActionSendData",
+           "version": 3,
+           "parameters": {
+            "handleErrors": false
+           },
+           "mapper": {
+            "url": "https://api.line.me/v2/profile",
+            "method": "get",
+            "serializeUrl": false,
+            "shareCookies": false,
+            "parseResponse": true,
+            "headers": [
+             {
+              "name": "Authorization",
+              "value": "Bearer {{1.t}}"
+             }
+            ],
+            "qs": [],
+            "rejectUnauthorized": true,
+            "followRedirect": true,
+            "followAllRedirects": false,
+            "useQuerystring": false,
+            "gzip": true,
+            "useMtls": false
+           },
+           "metadata": {
+            "designer": {
+             "x": 150,
+             "y": 150,
+             "name": "向 LINE 取得使用者編號"
+            }
+           },
+           "onerror": [
+            {
+             "id": 103,
+             "module": "gateway:WebhookRespond",
+             "version": 1,
+             "parameters": {},
+             "mapper": {
+              "status": "401",
+              "body": "{\"ok\":false,\"error\":\"auth\"}",
+              "headers": [
+               {
+                "key": "Content-Type",
+                "value": "application/json; charset=utf-8"
+               },
+               {
+                "key": "Access-Control-Allow-Origin",
+                "value": "https://<GitHub 帳號>.github.io"
+               }
+              ]
+             },
+             "metadata": {
+              "designer": {
+               "x": 900,
+               "y": 300,
+               "name": "回傳驗證失敗（向 LINE 取得使用者編號）"
+              }
+             }
+            },
+            {
+             "id": 104,
+             "module": "builtin:Ignore",
+             "version": 1,
+             "mapper": null,
+             "metadata": {
+              "designer": {
+               "x": 1200,
+               "y": 300
+              }
+             }
+            }
+           ],
+           "filter": {
+            "name": "身分驗證成功",
+            "conditions": [
+             [
+              {
+               "a": "{{2.data.client_id}}",
+               "o": "text:equal",
+               "b": "LINE Login channel 的 Channel ID"
+              }
+             ]
+            ]
+           }
+          },
+          {
+           "id": 142,
+           "module": "builtin:BasicRouter",
+           "version": 1,
+           "mapper": null,
+           "metadata": {
+            "designer": {
+             "x": 600,
+             "y": 5400,
+             "name": "依動作分流"
+            }
+           },
+           "routes": [
+            {
+             "flow": [
+              {
+               "id": 105,
+               "module": "notion:searchObjects1",
+               "version": 1,
+               "mapper": {
+                "limit": "1",
+                "filter": [
+                 [
+                  {
+                   "a": "請求編號 |&*^%$#@| rich_text",
+                   "o": "text:equals",
+                   "b": "{{1.rid}}"
+                  }
+                 ]
+                ],
+                "select": "data_source_item",
+                "data_source": "名片資料庫的 data source ID（collection://… 後面那串）"
+               },
+               "metadata": {
+                "designer": {
+                 "x": 900,
+                 "y": 450,
+                 "name": "請求編號是否已送過"
+                },
+                "parameters": [
+                 {
+                  "name": "__IMTCONN__",
+                  "type": "account:notion2,notion3",
+                  "label": "Connection",
+                  "required": true
+                 }
+                ]
+               },
+               "parameters": {
+                "__IMTCONN__": 0
+               },
+               "filter": {
+                "name": "送出照片",
+                "conditions": [
+                 [
+                  {
+                   "a": "{{1.a}}",
+                   "o": "text:equal",
+                   "b": "submit"
+                  }
+                 ]
+                ]
+               }
+              },
+              {
+               "id": 130,
+               "module": "builtin:BasicRouter",
+               "version": 1,
+               "mapper": null,
+               "metadata": {
+                "designer": {
+                 "x": 600,
+                 "y": 3600,
+                 "name": "是否重複送出"
+                }
+               },
+               "routes": [
+                {
+                 "flow": [
+                  {
+                   "id": 107,
+                   "module": "gateway:WebhookRespond",
+                   "version": 1,
+                   "parameters": {},
+                   "mapper": {
+                    "status": "200",
+                    "body": "{\"ok\":true,\"duplicate\":true}",
+                    "headers": [
+                     {
+                      "key": "Content-Type",
+                      "value": "application/json; charset=utf-8"
+                     },
+                     {
+                      "key": "Access-Control-Allow-Origin",
+                      "value": "https://<GitHub 帳號>.github.io"
+                     }
+                    ]
+                   },
+                   "metadata": {
+                    "designer": {
+                     "x": 900,
+                     "y": 750,
+                     "name": "回傳重複"
+                    }
+                   },
+                   "filter": {
+                    "name": "已送過",
+                    "conditions": [
+                     [
+                      {
+                       "a": "{{105.id}}",
+                       "o": "exist"
+                      }
+                     ]
+                    ]
+                   }
+                  }
+                 ]
+                },
+                {
+                 "flow": [
+                  {
+                   "id": 108,
+                   "module": "gateway:WebhookRespond",
+                   "version": 1,
+                   "parameters": {},
+                   "mapper": {
+                    "status": "200",
+                    "body": "{\"ok\":true}",
+                    "headers": [
+                     {
+                      "key": "Content-Type",
+                      "value": "application/json; charset=utf-8"
+                     },
+                     {
+                      "key": "Access-Control-Allow-Origin",
+                      "value": "https://<GitHub 帳號>.github.io"
+                     }
+                    ]
+                   },
+                   "metadata": {
+                    "designer": {
+                     "x": 900,
+                     "y": 900,
+                     "name": "先回應頁面（現場不用等）"
+                    }
+                   },
+                   "filter": {
+                    "name": "新的名片",
+                    "conditions": [
+                     [
+                      {
+                       "a": "{{105.id}}",
+                       "o": "notexist"
+                      },
+                      {
+                       "a": "{{1.card}}",
+                       "o": "exist"
+                      }
+                     ]
+                    ]
+                   }
+                  },
+                  {
+                   "id": 106,
+                   "module": "notion:createDataSourceItem",
+                   "version": 1,
+                   "mapper": {
+                    "fields": [
+                     {
+                      "key": "姓名",
+                      "type": "title",
+                      "value": "（待辨識）"
+                     },
+                     {
+                      "key": "狀態",
+                      "type": "select",
+                      "value": "處理中"
+                     },
+                     {
+                      "key": "請求編號",
+                      "type": "rich_text",
+                      "value": "{{substring(1.rid; 0; 40)}}"
+                     },
+                     {
+                      "key": "拍攝者",
+                      "type": "rich_text",
+                      "value": "{{4.data.displayName}}"
+                     },
+                     {
+                      "key": "拍攝者 LINE ID",
+                      "type": "rich_text",
+                      "value": "{{4.data.userId}}"
+                     },
+                     {
+                      "key": "認識場合",
+                      "type": "rich_text",
+                      "value": "{{substring(1.place; 0; 120)}}"
+                     },
+                     {
+                      "key": "備註",
+                      "type": "rich_text",
+                      "value": "{{substring(1.note; 0; 1000)}}"
+                     }
+                    ],
+                    "select": "map",
+                    "data_source": "名片資料庫的 data source ID（collection://… 後面那串）"
+                   },
+                   "metadata": {
+                    "designer": {
+                     "x": 900,
+                     "y": 600,
+                     "name": "新增名片（處理中）"
+                    },
+                    "parameters": [
+                     {
+                      "name": "__IMTCONN__",
+                      "type": "account:notion2,notion3",
+                      "label": "Connection",
+                      "required": true
+                     }
+                    ]
+                   },
+                   "parameters": {
+                    "__IMTCONN__": 0
+                   }
+                  },
+                  {
+                   "id": 128,
+                   "module": "builtin:BasicRouter",
+                   "version": 1,
+                   "mapper": null,
+                   "metadata": {
+                    "designer": {
+                     "x": 600,
+                     "y": 3300,
+                     "name": "有沒有合照"
+                    }
+                   },
+                   "routes": [
+                    {
+                     "flow": [
+                      {
+                       "id": 109,
+                       "module": "google-drive:uploadAFile",
+                       "version": 4,
+                       "parameters": {
+                        "__IMTCONN__": 0
+                       },
+                       "mapper": {
+                        "select": "map",
+                        "folderId": "Google 雲端硬碟資料夾 ID（資料夾要設成「知道連結的人都能檢視」）",
+                        "filename": "{{1.rid}}_名片.jpg",
+                        "data": "{{toBinary(1.card; \"base64\")}}",
+                        "convert": false
+                       },
+                       "metadata": {
+                        "designer": {
+                         "x": 900,
+                         "y": 1050,
+                         "name": "名片照片存到雲端硬碟"
+                        },
+                        "parameters": [
+                         {
+                          "name": "__IMTCONN__",
+                          "type": "account:google-restricted,google-drive",
+                          "label": "Connection",
+                          "required": true
+                         }
+                        ]
+                       },
+                       "filter": {
+                        "name": "有合照",
+                        "conditions": [
+                         [
+                          {
+                           "a": "{{1.photo}}",
+                           "o": "exist"
+                          }
+                         ]
+                        ]
+                       }
+                      },
+                      {
+                       "id": 110,
+                       "module": "google-drive:uploadAFile",
+                       "version": 4,
+                       "parameters": {
+                        "__IMTCONN__": 0
+                       },
+                       "mapper": {
+                        "select": "map",
+                        "folderId": "Google 雲端硬碟資料夾 ID（資料夾要設成「知道連結的人都能檢視」）",
+                        "filename": "{{1.rid}}_合照.jpg",
+                        "data": "{{toBinary(1.photo; \"base64\")}}",
+                        "convert": false
+                       },
+                       "metadata": {
+                        "designer": {
+                         "x": 900,
+                         "y": 1200,
+                         "name": "合照存到雲端硬碟"
+                        },
+                        "parameters": [
+                         {
+                          "name": "__IMTCONN__",
+                          "type": "account:google-restricted,google-drive",
+                          "label": "Connection",
+                          "required": true
+                         }
+                        ]
+                       }
+                      },
+                      {
+                       "id": 111,
+                       "module": "notion:makeApiCall",
+                       "version": 1,
+                       "mapper": {
+                        "url": "/v1/pages/{{106.id}}",
+                        "method": "PATCH",
+                        "version": "2022-06-28",
+                        "headers": [
+                         {
+                          "key": "Content-Type",
+                          "value": "application/json"
+                         }
+                        ],
+                        "qs": [],
+                        "body": "{\"properties\": {\"名片照片\": {\"files\": [{\"name\": \"名片.jpg\", \"type\": \"external\", \"external\": {\"url\": \"https://drive.google.com/thumbnail?id={{109.id}}&sz=w1600\"}}]}, \"名片照片連結\": {\"url\": \"{{109.webViewLink}}\"}, \"合照\": {\"files\": [{\"name\": \"合照.jpg\", \"type\": \"external\", \"external\": {\"url\": \"https://drive.google.com/thumbnail?id={{110.id}}&sz=w1600\"}}]}, \"合照連結\": {\"url\": \"{{110.webViewLink}}\"}}}"
+                       },
+                       "metadata": {
+                        "designer": {
+                         "x": 900,
+                         "y": 1350,
+                         "name": "照片放進名片"
+                        },
+                        "parameters": [
+                         {
+                          "name": "__IMTCONN__",
+                          "type": "account:notion2,notion3",
+                          "label": "Connection",
+                          "required": true
+                         }
+                        ]
+                       },
+                       "parameters": {
+                        "__IMTCONN__": 0
+                       }
+                      },
+                      {
+                       "id": 114,
+                       "module": "gemini-ai:makeApiCall",
+                       "version": 1,
+                       "parameters": {
+                        "__IMTCONN__": 0
+                       },
+                       "mapper": {
+                        "url": "/v1beta/models/gemini-3.8-flash:generateContent",
+                        "method": "POST",
+                        "headers": [
+                         {
+                          "key": "Content-Type",
+                          "value": "application/json"
+                         }
+                        ],
+                        "qs": [],
+                        "body": {
+                         "contents": [
+                          {
+                           "role": "user",
+                           "parts": [
+                            {
+                             "text": "這是一張名片的照片。請讀出名片上的資訊填入欄位，讀不到的欄位一律給空字串，不要猜。姓名只放人名。電話和手機保留名片上的寫法，有多支就用「、」分隔；09 開頭或標示 Mobile 的放手機。其他聯絡方式放 LINE ID、傳真、統一編號、社群帳號，每項前面寫上名稱。雙語名片以中文為主，英文名字可以接在中文姓名後面的括號裡。raw 放名片上看得到的全部文字。只回傳一個 JSON 物件，欄位固定為：name（姓名）、company（公司）、title（職稱）、dept（部門）、mobile（手機）、phone（電話）、email（Email）、address（地址）、web（網站）、other（其他聯絡方式）、raw（全部文字），值一律是字串。"
+                            },
+                            {
+                             "inline_data": {
+                              "mime_type": "image/jpeg",
+                              "data": "{{1.card}}"
+                             }
+                            }
+                           ]
+                          }
+                         ],
+                         "generationConfig": {
+                          "responseMimeType": "application/json"
+                         }
+                        }
+                       },
+                       "metadata": {
+                        "designer": {
+                         "x": 900,
+                         "y": 1650,
+                         "name": "Gemini 辨識名片"
+                        },
+                        "parameters": [
+                         {
+                          "name": "__IMTCONN__",
+                          "type": "account:gemini-ai-q9zyjp",
+                          "label": "Connection",
+                          "required": true
+                         }
+                        ]
+                       },
+                       "onerror": [
+                        {
+                         "id": 112,
+                         "module": "notion:updateADatabaseItem",
+                         "version": 1,
+                         "mapper": {
+                          "page": "{{106.id}}",
+                          "fields": [
+                           {
+                            "key": "狀態",
+                            "type": "select",
+                            "value": "辨識失敗"
+                           }
+                          ],
+                          "select": "map",
+                          "updateBy": "data_source",
+                          "data_source": "名片資料庫的 data source ID（collection://… 後面那串）"
+                         },
+                         "metadata": {
+                          "designer": {
+                           "x": 900,
+                           "y": 1500,
+                           "name": "標成辨識失敗"
+                          },
+                          "parameters": [
+                           {
+                            "name": "__IMTCONN__",
+                            "type": "account:notion2,notion3",
+                            "label": "Connection",
+                            "required": true
+                           }
+                          ]
+                         },
+                         "parameters": {
+                          "__IMTCONN__": 0
+                         }
+                        },
+                        {
+                         "id": 113,
+                         "module": "builtin:Ignore",
+                         "version": 1,
+                         "mapper": null,
+                         "metadata": {
+                          "designer": {
+                           "x": 1200,
+                           "y": 1500
+                          }
+                         }
+                        }
+                       ]
+                      },
+                      {
+                       "id": 115,
+                       "module": "json:ParseJSON",
+                       "version": 1,
+                       "parameters": {
+                        "type": ""
+                       },
+                       "mapper": {
+                        "json": "{{114.body.candidates[1].content.parts[1].text}}"
+                       },
+                       "metadata": {
+                        "designer": {
+                         "x": 900,
+                         "y": 1800,
+                         "name": "解析辨識結果"
+                        }
+                       },
+                       "onerror": [
+                        {
+                         "id": 116,
+                         "module": "notion:updateADatabaseItem",
+                         "version": 1,
+                         "mapper": {
+                          "page": "{{106.id}}",
+                          "fields": [
+                           {
+                            "key": "狀態",
+                            "type": "select",
+                            "value": "辨識失敗"
+                           }
+                          ],
+                          "select": "map",
+                          "updateBy": "data_source",
+                          "data_source": "名片資料庫的 data source ID（collection://… 後面那串）"
+                         },
+                         "metadata": {
+                          "designer": {
+                           "x": 900,
+                           "y": 1950,
+                           "name": "標成辨識失敗（解析）"
+                          },
+                          "parameters": [
+                           {
+                            "name": "__IMTCONN__",
+                            "type": "account:notion2,notion3",
+                            "label": "Connection",
+                            "required": true
+                           }
+                          ]
+                         },
+                         "parameters": {
+                          "__IMTCONN__": 0
+                         }
+                        },
+                        {
+                         "id": 117,
+                         "module": "builtin:Ignore",
+                         "version": 1,
+                         "mapper": null,
+                         "metadata": {
+                          "designer": {
+                           "x": 1200,
+                           "y": 1950
+                          }
+                         }
+                        }
+                       ]
+                      },
+                      {
+                       "id": 118,
+                       "module": "notion:updateADatabaseItem",
+                       "version": 1,
+                       "mapper": {
+                        "page": "{{106.id}}",
+                        "fields": [
+                         {
+                          "key": "姓名",
+                          "type": "title",
+                          "value": "{{ifempty(substring(115.name; 0; 80); \"（待辨識）\")}}"
+                         },
+                         {
+                          "key": "公司",
+                          "type": "rich_text",
+                          "value": "{{substring(115.company; 0; 120)}}"
+                         },
+                         {
+                          "key": "職稱",
+                          "type": "rich_text",
+                          "value": "{{substring(115.title; 0; 80)}}"
+                         },
+                         {
+                          "key": "部門",
+                          "type": "rich_text",
+                          "value": "{{substring(115.dept; 0; 80)}}"
+                         },
+                         {
+                          "key": "手機",
+                          "type": "phone_number",
+                          "value": "{{substring(115.mobile; 0; 60)}}"
+                         },
+                         {
+                          "key": "電話",
+                          "type": "phone_number",
+                          "value": "{{substring(115.phone; 0; 60)}}"
+                         },
+                         {
+                          "key": "Email",
+                          "type": "email",
+                          "value": "{{substring(115.email; 0; 120)}}"
+                         },
+                         {
+                          "key": "地址",
+                          "type": "rich_text",
+                          "value": "{{substring(115.address; 0; 200)}}"
+                         },
+                         {
+                          "key": "網站",
+                          "type": "url",
+                          "value": "{{substring(115.web; 0; 200)}}"
+                         },
+                         {
+                          "key": "其他聯絡方式",
+                          "type": "rich_text",
+                          "value": "{{substring(115.other; 0; 300)}}"
+                         },
+                         {
+                          "key": "辨識原文",
+                          "type": "rich_text",
+                          "value": "{{substring(115.raw; 0; 1900)}}"
+                         },
+                         {
+                          "key": "狀態",
+                          "type": "select",
+                          "value": "待確認"
+                         }
+                        ],
+                        "select": "map",
+                        "updateBy": "data_source",
+                        "data_source": "名片資料庫的 data source ID（collection://… 後面那串）"
+                       },
+                       "metadata": {
+                        "designer": {
+                         "x": 900,
+                         "y": 2100,
+                         "name": "寫入辨識結果（待確認）"
+                        },
+                        "parameters": [
+                         {
+                          "name": "__IMTCONN__",
+                          "type": "account:notion2,notion3",
+                          "label": "Connection",
+                          "required": true
+                         }
+                        ]
+                       },
+                       "parameters": {
+                        "__IMTCONN__": 0
+                       }
+                      }
+                     ]
+                    },
+                    {
+                     "flow": [
+                      {
+                       "id": 119,
+                       "module": "google-drive:uploadAFile",
+                       "version": 4,
+                       "parameters": {
+                        "__IMTCONN__": 0
+                       },
+                       "mapper": {
+                        "select": "map",
+                        "folderId": "Google 雲端硬碟資料夾 ID（資料夾要設成「知道連結的人都能檢視」）",
+                        "filename": "{{1.rid}}_名片.jpg",
+                        "data": "{{toBinary(1.card; \"base64\")}}",
+                        "convert": false
+                       },
+                       "metadata": {
+                        "designer": {
+                         "x": 900,
+                         "y": 2250,
+                         "name": "名片照片存到雲端硬碟"
+                        },
+                        "parameters": [
+                         {
+                          "name": "__IMTCONN__",
+                          "type": "account:google-restricted,google-drive",
+                          "label": "Connection",
+                          "required": true
+                         }
+                        ]
+                       },
+                       "filter": {
+                        "name": "沒有合照",
+                        "conditions": [
+                         [
+                          {
+                           "a": "{{1.photo}}",
+                           "o": "notexist"
+                          }
+                         ]
+                        ]
+                       }
+                      },
+                      {
+                       "id": 120,
+                       "module": "notion:makeApiCall",
+                       "version": 1,
+                       "mapper": {
+                        "url": "/v1/pages/{{106.id}}",
+                        "method": "PATCH",
+                        "version": "2022-06-28",
+                        "headers": [
+                         {
+                          "key": "Content-Type",
+                          "value": "application/json"
+                         }
+                        ],
+                        "qs": [],
+                        "body": "{\"properties\": {\"名片照片\": {\"files\": [{\"name\": \"名片.jpg\", \"type\": \"external\", \"external\": {\"url\": \"https://drive.google.com/thumbnail?id={{119.id}}&sz=w1600\"}}]}, \"名片照片連結\": {\"url\": \"{{119.webViewLink}}\"}}}"
+                       },
+                       "metadata": {
+                        "designer": {
+                         "x": 900,
+                         "y": 2400,
+                         "name": "照片放進名片"
+                        },
+                        "parameters": [
+                         {
+                          "name": "__IMTCONN__",
+                          "type": "account:notion2,notion3",
+                          "label": "Connection",
+                          "required": true
+                         }
+                        ]
+                       },
+                       "parameters": {
+                        "__IMTCONN__": 0
+                       }
+                      },
+                      {
+                       "id": 123,
+                       "module": "gemini-ai:makeApiCall",
+                       "version": 1,
+                       "parameters": {
+                        "__IMTCONN__": 0
+                       },
+                       "mapper": {
+                        "url": "/v1beta/models/gemini-3.8-flash:generateContent",
+                        "method": "POST",
+                        "headers": [
+                         {
+                          "key": "Content-Type",
+                          "value": "application/json"
+                         }
+                        ],
+                        "qs": [],
+                        "body": {
+                         "contents": [
+                          {
+                           "role": "user",
+                           "parts": [
+                            {
+                             "text": "這是一張名片的照片。請讀出名片上的資訊填入欄位，讀不到的欄位一律給空字串，不要猜。姓名只放人名。電話和手機保留名片上的寫法，有多支就用「、」分隔；09 開頭或標示 Mobile 的放手機。其他聯絡方式放 LINE ID、傳真、統一編號、社群帳號，每項前面寫上名稱。雙語名片以中文為主，英文名字可以接在中文姓名後面的括號裡。raw 放名片上看得到的全部文字。只回傳一個 JSON 物件，欄位固定為：name（姓名）、company（公司）、title（職稱）、dept（部門）、mobile（手機）、phone（電話）、email（Email）、address（地址）、web（網站）、other（其他聯絡方式）、raw（全部文字），值一律是字串。"
+                            },
+                            {
+                             "inline_data": {
+                              "mime_type": "image/jpeg",
+                              "data": "{{1.card}}"
+                             }
+                            }
+                           ]
+                          }
+                         ],
+                         "generationConfig": {
+                          "responseMimeType": "application/json"
+                         }
+                        }
+                       },
+                       "metadata": {
+                        "designer": {
+                         "x": 900,
+                         "y": 2700,
+                         "name": "Gemini 辨識名片"
+                        },
+                        "parameters": [
+                         {
+                          "name": "__IMTCONN__",
+                          "type": "account:gemini-ai-q9zyjp",
+                          "label": "Connection",
+                          "required": true
+                         }
+                        ]
+                       },
+                       "onerror": [
+                        {
+                         "id": 121,
+                         "module": "notion:updateADatabaseItem",
+                         "version": 1,
+                         "mapper": {
+                          "page": "{{106.id}}",
+                          "fields": [
+                           {
+                            "key": "狀態",
+                            "type": "select",
+                            "value": "辨識失敗"
+                           }
+                          ],
+                          "select": "map",
+                          "updateBy": "data_source",
+                          "data_source": "名片資料庫的 data source ID（collection://… 後面那串）"
+                         },
+                         "metadata": {
+                          "designer": {
+                           "x": 900,
+                           "y": 2550,
+                           "name": "標成辨識失敗"
+                          },
+                          "parameters": [
+                           {
+                            "name": "__IMTCONN__",
+                            "type": "account:notion2,notion3",
+                            "label": "Connection",
+                            "required": true
+                           }
+                          ]
+                         },
+                         "parameters": {
+                          "__IMTCONN__": 0
+                         }
+                        },
+                        {
+                         "id": 122,
+                         "module": "builtin:Ignore",
+                         "version": 1,
+                         "mapper": null,
+                         "metadata": {
+                          "designer": {
+                           "x": 1200,
+                           "y": 2550
+                          }
+                         }
+                        }
+                       ]
+                      },
+                      {
+                       "id": 124,
+                       "module": "json:ParseJSON",
+                       "version": 1,
+                       "parameters": {
+                        "type": ""
+                       },
+                       "mapper": {
+                        "json": "{{123.body.candidates[1].content.parts[1].text}}"
+                       },
+                       "metadata": {
+                        "designer": {
+                         "x": 900,
+                         "y": 2850,
+                         "name": "解析辨識結果"
+                        }
+                       },
+                       "onerror": [
+                        {
+                         "id": 125,
+                         "module": "notion:updateADatabaseItem",
+                         "version": 1,
+                         "mapper": {
+                          "page": "{{106.id}}",
+                          "fields": [
+                           {
+                            "key": "狀態",
+                            "type": "select",
+                            "value": "辨識失敗"
+                           }
+                          ],
+                          "select": "map",
+                          "updateBy": "data_source",
+                          "data_source": "名片資料庫的 data source ID（collection://… 後面那串）"
+                         },
+                         "metadata": {
+                          "designer": {
+                           "x": 900,
+                           "y": 3000,
+                           "name": "標成辨識失敗（解析）"
+                          },
+                          "parameters": [
+                           {
+                            "name": "__IMTCONN__",
+                            "type": "account:notion2,notion3",
+                            "label": "Connection",
+                            "required": true
+                           }
+                          ]
+                         },
+                         "parameters": {
+                          "__IMTCONN__": 0
+                         }
+                        },
+                        {
+                         "id": 126,
+                         "module": "builtin:Ignore",
+                         "version": 1,
+                         "mapper": null,
+                         "metadata": {
+                          "designer": {
+                           "x": 1200,
+                           "y": 3000
+                          }
+                         }
+                        }
+                       ]
+                      },
+                      {
+                       "id": 127,
+                       "module": "notion:updateADatabaseItem",
+                       "version": 1,
+                       "mapper": {
+                        "page": "{{106.id}}",
+                        "fields": [
+                         {
+                          "key": "姓名",
+                          "type": "title",
+                          "value": "{{ifempty(substring(124.name; 0; 80); \"（待辨識）\")}}"
+                         },
+                         {
+                          "key": "公司",
+                          "type": "rich_text",
+                          "value": "{{substring(124.company; 0; 120)}}"
+                         },
+                         {
+                          "key": "職稱",
+                          "type": "rich_text",
+                          "value": "{{substring(124.title; 0; 80)}}"
+                         },
+                         {
+                          "key": "部門",
+                          "type": "rich_text",
+                          "value": "{{substring(124.dept; 0; 80)}}"
+                         },
+                         {
+                          "key": "手機",
+                          "type": "phone_number",
+                          "value": "{{substring(124.mobile; 0; 60)}}"
+                         },
+                         {
+                          "key": "電話",
+                          "type": "phone_number",
+                          "value": "{{substring(124.phone; 0; 60)}}"
+                         },
+                         {
+                          "key": "Email",
+                          "type": "email",
+                          "value": "{{substring(124.email; 0; 120)}}"
+                         },
+                         {
+                          "key": "地址",
+                          "type": "rich_text",
+                          "value": "{{substring(124.address; 0; 200)}}"
+                         },
+                         {
+                          "key": "網站",
+                          "type": "url",
+                          "value": "{{substring(124.web; 0; 200)}}"
+                         },
+                         {
+                          "key": "其他聯絡方式",
+                          "type": "rich_text",
+                          "value": "{{substring(124.other; 0; 300)}}"
+                         },
+                         {
+                          "key": "辨識原文",
+                          "type": "rich_text",
+                          "value": "{{substring(124.raw; 0; 1900)}}"
+                         },
+                         {
+                          "key": "狀態",
+                          "type": "select",
+                          "value": "待確認"
+                         }
+                        ],
+                        "select": "map",
+                        "updateBy": "data_source",
+                        "data_source": "名片資料庫的 data source ID（collection://… 後面那串）"
+                       },
+                       "metadata": {
+                        "designer": {
+                         "x": 900,
+                         "y": 3150,
+                         "name": "寫入辨識結果（待確認）"
+                        },
+                        "parameters": [
+                         {
+                          "name": "__IMTCONN__",
+                          "type": "account:notion2,notion3",
+                          "label": "Connection",
+                          "required": true
+                         }
+                        ]
+                       },
+                       "parameters": {
+                        "__IMTCONN__": 0
+                       }
+                      }
+                     ]
+                    }
+                   ]
+                  }
+                 ]
+                },
+                {
+                 "flow": [
+                  {
+                   "id": 129,
+                   "module": "gateway:WebhookRespond",
+                   "version": 1,
+                   "parameters": {},
+                   "mapper": {
+                    "status": "400",
+                    "body": "{\"ok\":false,\"error\":\"no_card\"}",
+                    "headers": [
+                     {
+                      "key": "Content-Type",
+                      "value": "application/json; charset=utf-8"
+                     },
+                     {
+                      "key": "Access-Control-Allow-Origin",
+                      "value": "https://<GitHub 帳號>.github.io"
+                     }
+                    ]
+                   },
+                   "metadata": {
+                    "designer": {
+                     "x": 900,
+                     "y": 3450,
+                     "name": "回傳缺名片照片"
+                    }
+                   },
+                   "filter": {
+                    "name": "沒有名片照片",
+                    "conditions": [
+                     [
+                      {
+                       "a": "{{105.id}}",
+                       "o": "notexist"
+                      },
+                      {
+                       "a": "{{1.card}}",
+                       "o": "notexist"
+                      }
+                     ]
+                    ]
+                   }
+                  }
+                 ]
+                }
+               ]
+              }
+             ]
+            },
+            {
+             "flow": [
+              {
+               "id": 131,
+               "module": "notion:searchObjects1",
+               "version": 1,
+               "mapper": {
+                "limit": "100",
+                "filter": [
+                 [
+                  {
+                   "a": "拍攝者 LINE ID |&*^%$#@| rich_text",
+                   "o": "text:equals",
+                   "b": "{{4.data.userId}}"
+                  }
+                 ]
+                ],
+                "select": "data_source_item",
+                "data_source": "名片資料庫的 data source ID（collection://… 後面那串）",
+                "sorts": [
+                 {
+                  "select": "timestamp",
+                  "direction": "descending",
+                  "timestamp": "created_time"
+                 }
+                ]
+               },
+               "metadata": {
+                "designer": {
+                 "x": 900,
+                 "y": 3750,
+                 "name": "找我拍的名片"
+                },
+                "parameters": [
+                 {
+                  "name": "__IMTCONN__",
+                  "type": "account:notion2,notion3",
+                  "label": "Connection",
+                  "required": true
+                 }
+                ]
+               },
+               "parameters": {
+                "__IMTCONN__": 0
+               },
+               "filter": {
+                "name": "待確認清單",
+                "conditions": [
+                 [
+                  {
+                   "a": "{{1.a}}",
+                   "o": "text:equal",
+                   "b": "list"
+                  }
+                 ]
+                ]
+               }
+              },
+              {
+               "id": 132,
+               "module": "builtin:BasicAggregator",
+               "version": 1,
+               "parameters": {
+                "feeder": 131
+               },
+               "mapper": {
+                "id": "{{131.id}}",
+                "created_time": "{{131.created_time}}",
+                "properties_value": "{{131.properties_value}}"
+               },
+               "metadata": {
+                "designer": {
+                 "x": 900,
+                 "y": 3900,
+                 "name": "彙整名片"
+                }
+               }
+              },
+              {
+               "id": 133,
+               "module": "json:TransformToJSON",
+               "version": 1,
+               "parameters": {
+                "space": ""
+               },
+               "mapper": {
+                "object": "{{132.array}}"
+               },
+               "metadata": {
+                "designer": {
+                 "x": 900,
+                 "y": 4050,
+                 "name": "名片轉成 JSON"
+                }
+               }
+              },
+              {
+               "id": 134,
+               "module": "gateway:WebhookRespond",
+               "version": 1,
+               "parameters": {},
+               "mapper": {
+                "status": "200",
+                "body": "{\"ok\":true,\"cards\":{{133.json}}}",
+                "headers": [
+                 {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                 },
+                 {
+                  "key": "Access-Control-Allow-Origin",
+                  "value": "https://<GitHub 帳號>.github.io"
+                 }
+                ]
+               },
+               "metadata": {
+                "designer": {
+                 "x": 900,
+                 "y": 4200,
+                 "name": "回傳名片清單"
+                }
+               }
+              }
+             ]
+            },
+            {
+             "flow": [
+              {
+               "id": 135,
+               "module": "notion:getADatabaseItem",
+               "version": 1,
+               "mapper": {
+                "page": "{{1.id}}",
+                "getBy": "data_source",
+                "select": "map"
+               },
+               "metadata": {
+                "designer": {
+                 "x": 900,
+                 "y": 4350,
+                 "name": "讀這張名片"
+                },
+                "parameters": [
+                 {
+                  "name": "__IMTCONN__",
+                  "type": "account:notion2,notion3",
+                  "label": "Connection",
+                  "required": true
+                 }
+                ]
+               },
+               "parameters": {
+                "__IMTCONN__": 0
+               },
+               "filter": {
+                "name": "確認存入",
+                "conditions": [
+                 [
+                  {
+                   "a": "{{1.a}}",
+                   "o": "text:equal",
+                   "b": "save"
+                  }
+                 ]
+                ]
+               }
+              },
+              {
+               "id": 139,
+               "module": "builtin:BasicRouter",
+               "version": 1,
+               "mapper": null,
+               "metadata": {
+                "designer": {
+                 "x": 600,
+                 "y": 4950,
+                 "name": "是不是自己拍的"
+                }
+               },
+               "routes": [
+                {
+                 "flow": [
+                  {
+                   "id": 136,
+                   "module": "notion:updateADatabaseItem",
+                   "version": 1,
+                   "mapper": {
+                    "page": "{{1.id}}",
+                    "fields": [
+                     {
+                      "key": "姓名",
+                      "type": "title",
+                      "value": "{{substring(1.name; 0; 80)}}"
+                     },
+                     {
+                      "key": "公司",
+                      "type": "rich_text",
+                      "value": "{{substring(1.company; 0; 120)}}"
+                     },
+                     {
+                      "key": "職稱",
+                      "type": "rich_text",
+                      "value": "{{substring(1.title; 0; 80)}}"
+                     },
+                     {
+                      "key": "部門",
+                      "type": "rich_text",
+                      "value": "{{substring(1.dept; 0; 80)}}"
+                     },
+                     {
+                      "key": "手機",
+                      "type": "phone_number",
+                      "value": "{{substring(1.mobile; 0; 60)}}"
+                     },
+                     {
+                      "key": "電話",
+                      "type": "phone_number",
+                      "value": "{{substring(1.phone; 0; 60)}}"
+                     },
+                     {
+                      "key": "Email",
+                      "type": "email",
+                      "value": "{{substring(1.email; 0; 120)}}"
+                     },
+                     {
+                      "key": "地址",
+                      "type": "rich_text",
+                      "value": "{{substring(1.address; 0; 200)}}"
+                     },
+                     {
+                      "key": "網站",
+                      "type": "url",
+                      "value": "{{substring(1.web; 0; 200)}}"
+                     },
+                     {
+                      "key": "其他聯絡方式",
+                      "type": "rich_text",
+                      "value": "{{substring(1.other; 0; 300)}}"
+                     },
+                     {
+                      "key": "認識場合",
+                      "type": "rich_text",
+                      "value": "{{substring(1.place; 0; 120)}}"
+                     },
+                     {
+                      "key": "備註",
+                      "type": "rich_text",
+                      "value": "{{substring(1.note; 0; 1000)}}"
+                     },
+                     {
+                      "key": "標籤",
+                      "type": "multi_select",
+                      "value": "{{if(1.tags; split(1.tags; \",\"); emptyarray)}}"
+                     },
+                     {
+                      "key": "狀態",
+                      "type": "select",
+                      "value": "已確認"
+                     },
+                     {
+                      "key": "確認時間",
+                      "type": "date",
+                      "date": {
+                       "start": "{{now}}",
+                       "includeTime": true
+                      }
+                     }
+                    ],
+                    "select": "map",
+                    "updateBy": "data_source",
+                    "data_source": "名片資料庫的 data source ID（collection://… 後面那串）"
+                   },
+                   "metadata": {
+                    "designer": {
+                     "x": 900,
+                     "y": 4500,
+                     "name": "確認存入"
+                    },
+                    "parameters": [
+                     {
+                      "name": "__IMTCONN__",
+                      "type": "account:notion2,notion3",
+                      "label": "Connection",
+                      "required": true
+                     }
+                    ]
+                   },
+                   "parameters": {
+                    "__IMTCONN__": 0
+                   },
+                   "filter": {
+                    "name": "自己拍的",
+                    "conditions": [
+                     [
+                      {
+                       "a": "{{135.properties_value.`拍攝者 LINE ID`[].plain_text}}",
+                       "o": "text:equal",
+                       "b": "{{4.data.userId}}"
+                      },
+                      {
+                       "a": "{{1.name}}",
+                       "o": "exist"
+                      }
+                     ]
+                    ]
+                   }
+                  },
+                  {
+                   "id": 137,
+                   "module": "gateway:WebhookRespond",
+                   "version": 1,
+                   "parameters": {},
+                   "mapper": {
+                    "status": "200",
+                    "body": "{\"ok\":true}",
+                    "headers": [
+                     {
+                      "key": "Content-Type",
+                      "value": "application/json; charset=utf-8"
+                     },
+                     {
+                      "key": "Access-Control-Allow-Origin",
+                      "value": "https://<GitHub 帳號>.github.io"
+                     }
+                    ]
+                   },
+                   "metadata": {
+                    "designer": {
+                     "x": 900,
+                     "y": 4650,
+                     "name": "回傳已存入"
+                    }
+                   }
+                  }
+                 ]
+                },
+                {
+                 "flow": [
+                  {
+                   "id": 138,
+                   "module": "gateway:WebhookRespond",
+                   "version": 1,
+                   "parameters": {},
+                   "mapper": {
+                    "status": "403",
+                    "body": "{\"ok\":false,\"error\":\"not_yours\"}",
+                    "headers": [
+                     {
+                      "key": "Content-Type",
+                      "value": "application/json; charset=utf-8"
+                     },
+                     {
+                      "key": "Access-Control-Allow-Origin",
+                      "value": "https://<GitHub 帳號>.github.io"
+                     }
+                    ]
+                   },
+                   "metadata": {
+                    "designer": {
+                     "x": 900,
+                     "y": 4800,
+                     "name": "回傳不是你的"
+                    }
+                   },
+                   "filter": {
+                    "name": "別人拍的",
+                    "conditions": [
+                     [
+                      {
+                       "a": "{{135.properties_value.`拍攝者 LINE ID`[].plain_text}}",
+                       "o": "text:notequal",
+                       "b": "{{4.data.userId}}"
+                      }
+                     ]
+                    ]
+                   }
+                  }
+                 ]
+                }
+               ]
+              }
+             ]
+            }
+           ]
+          }
+         ]
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "metadata": {
+  "instant": true,
+  "version": 1,
+  "designer": {
+   "orphans": []
+  },
+  "scenario": {
+   "dlq": true,
+   "slots": null,
+   "dataloss": false,
+   "maxErrors": 3,
+   "autoCommit": true,
+   "roundtrips": 1,
+   "sequential": false,
+   "confidential": false,
+   "freshVariables": false,
+   "autoCommitTriggerLast": true
+  }
+ }
+}

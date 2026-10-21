@@ -1,0 +1,21 @@
+{
+  "_說明": "複製成 config.local.json 再填入自己的 ID",
+  "make": {
+    "team_id": 0,
+    "folder_id": 0,
+    "hook_id": 0,
+    "notion_connection_id": 0,
+    "gemini_connection_id": 0,
+    "drive_connection_id": 0,
+    "drive_folder_id": "Google 雲端硬碟資料夾 ID（資料夾要設成「知道連結的人都能檢視」）"
+  },
+  "line": {
+    "login_channel_id": "LINE Login channel 的 Channel ID",
+    "liff_id": "LIFF ID"
+  },
+  "notion": {
+    "data_source_id": "名片資料庫的 data source ID（collection://… 後面那串）"
+  },
+  "gemini_model": "gemini-3.8-flash",
+  "page_origin": "https://<GitHub 帳號>.github.io"
+}
