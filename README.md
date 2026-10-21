@@ -53,7 +53,7 @@
 | 會員頁面（LIFF） | `liff/member/` | 依身分顯示：申請入會表單／審核中／會員資料與會員功能／停權。`?v=about` 是協會介紹。申請表上方可以「拍名片，自動填入」：Gemini 讀出姓名、手機、Email、公司、職稱填進表單（約一分鐘），申請人確認後才送出；照片不存檔 |
 | 協會品牌 | `assets/brand/` | `logo.png` 橫式 Logo（頁面頂端）、`mark.png` 圓環標誌（選單、頁面圖示）、`brand.json` 名稱與介紹 |
 | 選單圖片 | `tools/make_member_richmenu.py` 產生 `assets/richmenu_guest.png`、`richmenu_member.png` | 兩列六格（2500×1686）。上列兩張共用：近期活動｜協會會員列表｜AI 小幫手（目前是會員頁面的「即將推出」畫面）。下列：會員是名片掃描＋兩格空位；訪客是一整格「申請加入」 |
-| Make 情境 | `tools/make_member_blueprint.py` 產生三份藍圖 | 「朕宏｜會員 API」「朕宏｜會員：LINE 事件」「朕宏｜會員：建立圖文選單」 |
+| Make 情境 | `tools/make_member_blueprint.py` 產生三份藍圖 | 「朕宏｜會員 API」「朕宏｜會員：LINE 事件」「朕宏｜會員：建立圖文選單（手動執行）」 |
 | Notion | 「會員名冊」資料庫 | 「核准按鈕」「套用身分按鈕」兩個公式欄位是連結，點了就呼叫 Make |
 
 **換選單的規則集中在一個地方**：核准、套用身分、打開會員頁面時的校正，最後都是「依 Notion 的身分，綁定或解除會員選單，再把『目前選單』寫回 Notion」。打開會員頁面時發現兩邊對不上，會自動校正（苗栗踩過舊選單卡住的問題）。
@@ -64,7 +64,7 @@
 
 核准連結裡有一組密鑰（`config.local.json` 的 `member.approve_key`，也寫在 Notion 公式裡），沒有密鑰的請求會被擋下。要換密鑰時兩邊一起改。
 
-**換 Logo 或協會介紹**：覆蓋 `assets/brand/` 裡的檔案（檔名不變）→ 推上 GitHub，頁面就會更新。選單圖片要再執行 `python tools/make_member_richmenu.py`、推上 GitHub，到 Make 手動執行「朕宏｜會員：建立圖文選單」；它會清掉舊選單，並把所有正式會員重新綁到新的會員選單。
+**換 Logo 或協會介紹**：覆蓋 `assets/brand/` 裡的檔案（檔名不變）→ 推上 GitHub，頁面就會更新。選單圖片要再執行 `python tools/make_member_richmenu.py`、推上 GitHub，到 Make 手動執行「朕宏｜會員：建立圖文選單（手動執行）」；它會清掉舊選單，並把所有正式會員重新綁到新的會員選單。
 
 **名片限會員使用**：設定了 `member` 時，名片情境會先查會員名冊，不是正式會員就回 `not_allowed`（每次多 1 點）。
 
@@ -84,4 +84,5 @@ python -m http.server 5191 --directory liff/namecard
 - Make 遇到空字串會略過不寫：在確認畫面把欄位清空，Notion 裡的舊值不會被清掉。
 - Gemini 要加 `thinkingConfig: {thinkingLevel: "low"}`：預設思考量讀一張名片要 180～220 秒，超過 Make webhook 的 180 秒上限就會失敗；low 約 50 秒、讀得一樣完整。`minimal` 這個模型不支援。
 - Gemini 免費方案的 gemini-3.8-flash 每天只能呼叫 20 次，用完會回 429，名片就標成「辨識失敗」。正式使用前要在 Google AI Studio 為這把金鑰的專案開啟付費（每張名片的費用很低）。
+- 只需要偶爾手動執行的情境（例如建立圖文選單），排程設成「On demand」並保持開啟，名稱加上「（手動執行）」。關閉的話 Make 會顯示「停用」，看起來像沒在用的情境。
 - Make 的「Create a Rich Menu」模組，`selected` 的說明是「Set the Rich Menu by Default」：建好就會變成所有人的預設選單。建立多張選單時，「設為預設選單」一定要放在全部建完之後（2026-10-21 會員選單因此蓋過訪客選單，所有好友都看到會員選單）。

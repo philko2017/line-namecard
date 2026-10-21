@@ -8,7 +8,7 @@
     下列：一整格「申請加入」
 
 標誌讀 assets/brand/mark.png、協會名稱與顏色讀 assets/brand/brand.json。換 Logo 後重新執行、推上 GitHub，
-再到 Make 執行一次「朕宏｜會員：建立圖文選單」。按鈕範圍寫在 tools/make_member_blueprint.py，兩邊的格子要一致。
+再到 Make 執行一次「朕宏｜會員：建立圖文選單（手動執行）」。按鈕範圍寫在 tools/make_member_blueprint.py，兩邊的格子要一致。
 
 執行：python tools/make_member_richmenu.py
 """

@@ -4,7 +4,7 @@
     LIFF 會員頁面：a=me 我的身分（順便校正選單）｜a=apply 申請入會｜a=scan 拍名片自動填申請表（欄位 t 是 LINE Access Token）
     Notion 核准連結：a=approve 核准入會｜a=sync 依身分套用選單（欄位 k 是密鑰、id 是名冊頁面 ID）
 - 會員_LINE事件.blueprint.json：「朕宏｜會員：LINE 事件」加好友就建一筆潛在會員；封鎖時標記
-- 會員_建立圖文選單.blueprint.json：「朕宏｜會員：建立圖文選單」訪客選單設為預設、會員選單設別名 member，
+- 會員_建立圖文選單.blueprint.json：「朕宏｜會員：建立圖文選單（手動執行）」訪客選單設為預設、會員選單設別名 member，
     清掉舊選單後把所有正式會員重新綁到新的會員選單
 
 身分與選單：潛在會員、審核中、停權 → 訪客選單（預設，不綁個人）；正式會員 → 會員選單（別名 member，綁個人）。
@@ -369,7 +369,7 @@ def build_menu():
     flow[-1]["routes"][0]["flow"][2]["filter"] = flt("不是新的兩張", [[
         c(f"{{{{{F}.richMenuId}}}}", "text:notequal", f"{{{{{G}.richMenuId}}}}"),
         c(f"{{{{{F}.richMenuId}}}}", "text:notequal", f"{{{{{Mm}.richMenuId}}}}")]])
-    bp = blueprint(PREFIX + "會員：建立圖文選單", flow)
+    bp = blueprint(PREFIX + "會員：建立圖文選單（手動執行）", flow)
     bp["metadata"]["instant"] = False
     return bp
 
