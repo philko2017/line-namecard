@@ -124,6 +124,8 @@ document.addEventListener("click", async e => {
       f[k] = (S.form[k] || "").trim();
       if (req && !f[k]) { toast(`請填「${label}」`); return; }
     }
+    if (f.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(f.email)) { toast("Email 格式不對，請再檢查一次"); return; }
+    if (!/^[0-9+\-()#\s]{8,}$/.test(f.phone)) { toast("手機號碼格式不對，請再檢查一次"); return; }
     S.busy = true; render();
     try { S.me = await api.apply(f); S.busy = false; S.editing = false; toast("已送出，等待審核"); render(); scrollTo(0, 0); }
     catch (x) { S.busy = false; if (!handleApiError(x)) { toast("送出失敗，請再按一次"); render(); } }
