@@ -293,6 +293,33 @@ def build(test_hook=None):
     return blueprint("名片", flow)
 
 
+def build_menu():
+    """名片：建立圖文選單（一次性；換圖時再執行）。
+    左右兩格：拍名片（LIFF 首頁）、待確認（?v=review）；設為所有人的預設選單。
+    圖片從 GitHub Pages 下載（assets/richmenu.png，由 tools/make_richmenu.py 產生），LINE 規定 2500×843、1MB 以內。"""
+    liff = lambda q="": {"type": "uri", "uri": f"https://liff.line.me/{LN['liff_id']}{q}"}
+    areas = [{"bounds": {"x": 0, "y": 0, "width": 1250, "height": 843}, "action": liff()},
+             {"bounds": {"x": 1250, "y": 0, "width": 1250, "height": 843}, "action": liff("?v=review")}]
+    line_meta = [{"name": "__IMTCONN__", "type": "account:line2", "label": "Connection", "required": True}]
+    conn = {"__IMTCONN__": LN["messaging_connection_id"]}
+    flow = [
+        {"id": 1, "module": "http:ActionGetFile", "version": 3, "parameters": {"handleErrors": False},
+         "mapper": {"url": f"{ORIGIN}/line-namecard/assets/richmenu.png", "method": "get",
+                    "serializeUrl": False, "shareCookies": False},
+         "metadata": {"designer": {"x": 0, "y": 0, "name": "下載選單圖片"}}},
+        {"id": 2, "module": "line:createARichMenu", "version": 1, "parameters": conn,
+         "mapper": {"name": "namecard", "chatBarText": "名片選單", "selected": True, "height": 843,
+                    "areas": areas, "data": "{{1.data}}", "filename": "richmenu.png"},
+         "metadata": {"designer": {"x": 300, "y": 0, "name": "建立圖文選單"}, "parameters": line_meta}},
+        {"id": 3, "module": "line:makeApiCall", "version": 1, "parameters": conn,
+         "mapper": {"url": "/v2/bot/user/all/richmenu/{{2.richMenuId}}", "method": "POST", "headers": []},
+         "metadata": {"designer": {"x": 600, "y": 0, "name": "設為所有人的預設選單"}, "parameters": line_meta}},
+    ]
+    bp = blueprint("名片：建立圖文選單", flow)
+    bp["metadata"]["instant"] = False
+    return bp
+
+
 def webhook(hook, name):
     return {"id": 1, "module": "gateway:CustomWebHook", "version": 1, "parameters": {"hook": hook, "maxResults": 1},
             "mapper": {}, "metadata": {"designer": {"x": -300, "y": 0, "name": name}, "parameters": [
@@ -314,6 +341,10 @@ def main():
     p = out / "名片.blueprint.json"
     p.write_text(json.dumps(build(), ensure_ascii=False, indent=1), encoding="utf-8")
     print(p, p.stat().st_size)
+    if LN.get("messaging_connection_id"):
+        m = out / "名片_建立圖文選單.blueprint.json"
+        m.write_text(json.dumps(build_menu(), ensure_ascii=False, indent=1), encoding="utf-8")
+        print(m, m.stat().st_size)
     if "--test-hook" in sys.argv:
         t = out / "名片_測試.blueprint.json"
         t.write_text(json.dumps(build(int(sys.argv[sys.argv.index("--test-hook") + 1])), ensure_ascii=False, indent=1),

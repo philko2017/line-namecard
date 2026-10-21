@@ -11,7 +11,8 @@
   },
   "line": {
     "login_channel_id": "LINE Login channel 的 Channel ID",
-    "liff_id": "LIFF ID"
+    "liff_id": "LIFF ID",
+    "messaging_connection_id": 0
   },
   "notion": {
     "data_source_id": "名片資料庫的 data source ID（collection://… 後面那串）"
