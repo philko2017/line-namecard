@@ -52,7 +52,7 @@
 |---|---|---|
 | 會員頁面（LIFF） | `liff/member/` | 依身分顯示：申請入會表單／審核中／會員資料與會員功能／停權。`?v=about` 是協會介紹 |
 | 協會品牌 | `assets/brand/` | `logo.png` 橫式 Logo（頁面頂端）、`mark.png` 圓環標誌（選單、頁面圖示）、`brand.json` 名稱與介紹 |
-| 選單圖片 | `tools/make_member_richmenu.py` 產生 `assets/richmenu_guest.png`、`richmenu_member.png` | 左側協會標誌（關於協會），右側功能格 |
+| 選單圖片 | `tools/make_member_richmenu.py` 產生 `assets/richmenu_guest.png`、`richmenu_member.png` | 兩列六格（2500×1686）。上列兩張共用：近期活動｜協會會員列表｜AI 小幫手（目前是會員頁面的「即將推出」畫面）。下列：會員是名片掃描＋兩格空位；訪客是一整格「申請加入」 |
 | Make 情境 | `tools/make_member_blueprint.py` 產生三份藍圖 | 「朕宏｜會員 API」「朕宏｜會員：LINE 事件」「朕宏｜會員：建立圖文選單」 |
 | Notion | 「會員名冊」資料庫 | 「核准」「套用身分」兩個公式欄位是連結，點了就呼叫 Make |
 
