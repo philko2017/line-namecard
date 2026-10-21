@@ -82,3 +82,4 @@ python -m http.server 5191 --directory liff/namecard
 - HTTP 模組遇到 4xx 會中斷整個執行；要在錯誤處理路線放 Webhook response＋Ignore，頁面才收得到錯誤。
 - 模組上的篩選沒通過，後面整條都會停，所以「有沒有合照」分成兩條路線。
 - Make 遇到空字串會略過不寫：在確認畫面把欄位清空，Notion 裡的舊值不會被清掉。
+- Make 的「Create a Rich Menu」模組，`selected` 的說明是「Set the Rich Menu by Default」：建好就會變成所有人的預設選單。建立多張選單時，「設為預設選單」一定要放在全部建完之後（2026-10-21 會員選單因此蓋過訪客選單，所有好友都看到會員選單）。

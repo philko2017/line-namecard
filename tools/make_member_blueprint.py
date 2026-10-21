@@ -321,8 +321,10 @@ def build_menu():
     members = b.notion("searchObjects1", "找所有正式會員", {"limit": "1000", "select": "data_source_item", "data_source": DS,
                                                        "filter": [[c("身分 |&*^%$#@| select", "select:equals", "正式會員")]]})
     MB = members["id"]
-    flow = [gg, gm, b.line("設為所有人的預設選單（訪客）", f"/v2/bot/user/all/richmenu/{{{{{G}.richMenuId}}}}", "POST"),
-            mg, mm,
+    # 預設選單一定要在兩張都建好之後才設：Make 的「Create a Rich Menu」勾了 selected（Set the Rich Menu by Default）
+    # 會把剛建好的那張設成預設，2026-10-21 會員選單因此蓋過訪客選單，所有好友都看到會員選單
+    flow = [gg, gm, mg, mm,
+            b.line("設為所有人的預設選單（訪客）", f"/v2/bot/user/all/richmenu/{{{{{G}.richMenuId}}}}", "POST"),
             b.router("設定會員選單別名", [
                 # 已有別名時更新成功、新建失敗；第一次部署時相反，各自出錯就略過
                 (flt("更新別名", [[c(f"{{{{{Mm}.richMenuId}}}}", "exist")]]), [
