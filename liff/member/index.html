@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://static.line-scdn.net https://liffsdk.line-scdn.net; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' https://hook.us2.make.com https://api.line.me https://*.line.me https://*.line-scdn.net https://uts-front.line-apps.com; frame-src https://*.line.me; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://static.line-scdn.net https://liffsdk.line-scdn.net; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; connect-src 'self' https://hook.us2.make.com https://api.line.me https://*.line.me https://*.line-scdn.net https://uts-front.line-apps.com; frame-src https://*.line.me; object-src 'none'; base-uri 'none'; form-action 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="robots" content="noindex, nofollow">
 <link rel="icon" href="../../assets/brand/mark.png">
@@ -59,6 +59,12 @@ dt{color:var(--soft)}
 .blocked{text-align:center;color:var(--soft);padding:48px 12px}
 .blocked h2{color:var(--text);font-size:19px;margin-bottom:8px}
 .ghost{color:var(--brand);font-weight:700;margin-top:10px}
+.scan{display:flex;align-items:center;gap:12px;margin-top:16px;padding:14px;border-radius:14px;border:1.5px dashed var(--brand);background:var(--brand-bg);cursor:pointer}
+.scan input{display:none}
+.scan .ic{font-size:30px}
+.scan b{display:block;color:var(--brand)}
+.scan small{color:var(--soft)}
+.scan.busy{border-style:solid;cursor:default}
 </style>
 </head>
 <body>

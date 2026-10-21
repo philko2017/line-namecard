@@ -1,5 +1,5 @@
 // ===== 設定：LIFF ID 與 API 網址。正式網址（GitHub Pages）一律用真資料；本機預覽才載入 mock.js 的模擬資料 =====
-// 會員頁面送到 Make 情境「朕宏｜會員 API」，用欄位 a 分辨動作：me 我的身分（順便校正選單）｜apply 申請入會
+// 會員頁面送到 Make 情境「朕宏｜會員 API」，用欄位 a 分辨動作：me 我的身分（順便校正選單）｜apply 申請入會｜scan 拍名片自動填表
 const CONFIG = {
   liffId: "2012132715-IdnIDWRU",
   apiUrl: "https://hook.us2.make.com/xj3tt9tr8e9m4q0cf1pwj37as8x0l7ki",
@@ -34,7 +34,22 @@ async function post(fields) {
   for (const k of Object.keys(data)) if (ENC_KEYS.has(k) && typeof data[k] === "string") data[k] = safeDecode(data[k]);
   return data;
 }
-let api = { me: () => post({ a: "me" }), apply: f => post({ a: "apply", ...f }) };
+let api = { me: () => post({ a: "me" }), apply: f => post({ a: "apply", ...f }), scan: card => post({ a: "scan", card }) };
+
+// ===== 名片照片：縮小成 JPEG（base64），和名片頁面相同的尺寸 =====
+const MAX_EDGE = 1600, JPEG_Q = 0.82;
+async function shrink(file) {
+  const url = URL.createObjectURL(file);
+  try {
+    const img = await new Promise((ok, fail) => { const i = new Image(); i.onload = () => ok(i); i.onerror = fail; i.src = url; });
+    const k = Math.min(1, MAX_EDGE / Math.max(img.naturalWidth, img.naturalHeight));
+    const c = document.createElement("canvas");
+    c.width = Math.round(img.naturalWidth * k); c.height = Math.round(img.naturalHeight * k);
+    c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+    const data = c.toDataURL("image/jpeg", JPEG_Q);
+    return data.slice(data.indexOf(",") + 1);
+  } finally { URL.revokeObjectURL(url); }
+}
 
 // ===== 狀態與畫面 =====
 const params = new URLSearchParams(location.search);
@@ -45,7 +60,7 @@ const SOON = {
   ai: ["✨", "AI 小幫手", "之後可以在這裡問協會、活動與入會的問題，AI 會幫你回答。"],
 };
 const V = params.get("v");
-const S = { view: V === "about" || SOON[V] ? V : "home", me: null, brand: {}, form: {}, busy: false, editing: false };
+const S = { view: V === "about" || SOON[V] ? V : "home", me: null, brand: {}, form: {}, busy: false, editing: false, scanning: false };
 
 function render() {
   const b = S.me && BADGE[S.me.state];
@@ -77,6 +92,12 @@ function renderApply() {
   const f = S.form;
   $("#app").innerHTML = `<h1>${editing ? "修改入會申請" : "申請入會"}</h1>
     <p class="lead">${editing ? "修改後重新送出，管理者會看到最新的資料。" : `歡迎加入${esc(S.brand.name || "")}。填寫資料送出後，由管理者審核，通過後下方選單會換成會員版。`}</p>
+    <label class="scan ${S.scanning ? "busy" : ""}">
+      <input type="file" accept="image/*" capture="environment" id="scanInput" ${S.scanning || S.busy ? "disabled" : ""}>
+      <span class="ic">${S.scanning ? "⏳" : "📷"}</span>
+      <span><b>${S.scanning ? "名片辨識中…" : "拍名片，自動填入"}</b>
+      <small>${S.scanning ? "大約需要一分鐘，請先不要關閉頁面" : "拍自己的名片，AI 幫你填好下面的欄位，確認後再送出"}</small></span>
+    </label>
     <div class="card">${FIELDS.map(([k, label, req, type]) => `<label class="f">${label}${req ? " <b>*</b>" : ""}${type === "area"
         ? `<textarea data-k="${k}">${esc(f[k])}</textarea>`
         : `<input data-k="${k}" type="${type}" value="${esc(f[k])}" ${k === "name" ? 'autocomplete="name"' : ""}>`}</label>`).join("")}</div>
@@ -114,11 +135,27 @@ function toast(msg) {
 
 // ===== 操作 =====
 document.addEventListener("input", e => { if (e.target.dataset.k) S.form[e.target.dataset.k] = e.target.value; });
+// 拍名片：辨識結果只填進表單，不會直接送出；有讀到的欄位才覆蓋，申請說明不動
+document.addEventListener("change", async e => {
+  if (e.target.id !== "scanInput" || !e.target.files[0] || S.scanning) return;
+  const file = e.target.files[0];
+  S.scanning = true; render();
+  try {
+    const r = await api.scan(await shrink(file));
+    let n = 0;
+    for (const k of ["name", "phone", "email", "company", "title"]) if (r[k]) { S.form[k] = r[k]; n++; }
+    S.scanning = false; render();
+    toast(n ? "已填入名片資料，請確認後再送出" : "名片上沒有讀到資料，請手動填寫");
+  } catch (x) {
+    S.scanning = false;
+    if (!handleApiError(x)) { render(); toast("名片辨識失敗，請重拍或手動填寫"); }
+  }
+});
 document.addEventListener("click", async e => {
   const t = e.target.closest("button"); if (!t) return;
   if (t.id === "edit") { S.editing = true; render(); return; }
   if (t.id === "cancelEdit") { S.editing = false; render(); return; }
-  if (t.id === "send" && !S.busy) {
+  if (t.id === "send" && !S.busy && !S.scanning) {
     const f = {};
     for (const [k, label, req] of FIELDS) {
       f[k] = (S.form[k] || "").trim();

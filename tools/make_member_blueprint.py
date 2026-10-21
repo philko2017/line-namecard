@@ -1,7 +1,7 @@
 """產生會員模組（選單切換）的 Make 藍圖，輸出到 make/：
 
 - 會員_API.blueprint.json：「朕宏｜會員 API」
-    LIFF 會員頁面：a=me 我的身分（順便校正選單）｜a=apply 申請入會（欄位 t 是 LINE Access Token）
+    LIFF 會員頁面：a=me 我的身分（順便校正選單）｜a=apply 申請入會｜a=scan 拍名片自動填申請表（欄位 t 是 LINE Access Token）
     Notion 核准連結：a=approve 核准入會｜a=sync 依身分套用選單（欄位 k 是密鑰、id 是名冊頁面 ID）
 - 會員_LINE事件.blueprint.json：「朕宏｜會員：LINE 事件」加好友就建一筆潛在會員；封鎖時標記
 - 會員_建立圖文選單.blueprint.json：「朕宏｜會員：建立圖文選單」訪客選單設為預設、會員選單設別名 member，
@@ -15,8 +15,8 @@
 import json
 import sys
 
-from make_blueprint import (CFG, CONN_NOTION, HTTP_DEFAULTS, LN, ORIGIN, PREFIX, ROOT, blueprint, c, cut, flt, fv,
-                            sp, webhook)
+from make_blueprint import (CFG, CONN_GEMINI, CONN_NOTION, HTTP_DEFAULTS, LN, MODEL, ORIGIN, PREFIX, ROOT, blueprint, c,
+                            cut, flt, fv, gemini_body, sp, webhook)
 
 M = CFG["member"]
 DS = M["data_source_id"]
@@ -227,7 +227,27 @@ def build_api():
             respond_json("回傳目前身分（申請）", me_body)]),
     ])]
 
+    # ==== scan：申請入會時拍名片，Gemini 讀出資料直接回給頁面填表（約一分鐘）；照片不存檔，資料由申請人確認後才送出 ====
+    def scan_fail(name):
+        return [respond_json(name, '{"ok":false,"error":"scan_failed"}', "502"), b.ignore()]
+    ai = {"id": b.nid(), "module": "gemini-ai:makeApiCall", "version": 1, "parameters": {"__IMTCONN__": CONN_GEMINI},
+          "mapper": {"url": f"/v1beta/models/{MODEL}:generateContent", "method": "POST",
+                     "headers": [{"key": "Content-Type", "value": "application/json"}], "qs": [], "body": gemini_body()},
+          "metadata": b.meta("Gemini 讀名片", [{"name": "__IMTCONN__", "type": "account:gemini-ai-q9zyjp", "label": "Connection", "required": True}]),
+          "onerror": scan_fail("回傳辨識失敗")}
+    parse = {"id": b.nid(), "module": "json:ParseJSON", "version": 1, "parameters": {"type": ""},
+             "mapper": {"json": "{{" + f"{ai['id']}.body.candidates[1].content.parts[1].text" + "}}"},
+             "metadata": b.meta("解析名片資料"), "onerror": scan_fail("回傳解析失敗")}
+    P = parse["id"]
+    # 名片上有多支電話、多個 Email 時只帶第一個（申請表只有一格）；手機優先
+    first = lambda e: "{{first(split(" + e + '; "、"))}}'
+    scan_src = {"name": f"{{{{{P}.name}}}}", "phone": first(f"ifempty({P}.mobile; {P}.phone)"), "email": first(f"{P}.email"),
+                "company": f"{{{{{P}.company}}}}", "title": f"{{{{{P}.title}}}}"}
+    scan_flow = [ai, parse, respond_json("回傳名片資料", "{" + ",".join(
+        ['"ok":true'] + [f'"{k}":"{enc(v)}"' for k, v in scan_src.items()]) + "}")]
+
     act = lambda a: c("{{1.a}}", "text:equal", a)
+    PAGE_ACTS = ("me", "apply", "scan")
     key_ok = c("{{1.k}}", "text:equal", KEY)
     flow = [
         webhook(M["hook_id"], "會員頁面與核准連結送來的請求"),
@@ -236,7 +256,7 @@ def build_api():
             (flt("核准連結：套用身分", [[act("sync"), key_ok, c("{{1.id}}", "exist")]]), admin_flow("sync")),
             (flt("核准連結：密鑰不對", [[act("approve"), c("{{1.k}}", "text:notequal", KEY)], [act("sync"), c("{{1.k}}", "text:notequal", KEY)]]), [
                 b.respond("回傳密鑰不對", html("⛔ 連結無效", "請從 Notion 會員名冊重新點連結。"), "403", True)]),
-            (flt("會員頁面", [[c("{{1.t}}", "exist"), act("me")], [c("{{1.t}}", "exist"), act("apply")]]), [
+            (flt("會員頁面", [[c("{{1.t}}", "exist"), act(a)] for a in PAGE_ACTS]), [
                 verify,
                 b.router("身分驗證", [
                     (flt("不是本系統的憑證", [[c("{{2.data.client_id}}", "text:notequal", CHANNEL)]]), [
@@ -244,11 +264,12 @@ def build_api():
                     (flt("身分驗證成功", [[c("{{2.data.client_id}}", "text:equal", CHANNEL)]]), [profile, w, b.router("依動作分流", [
                         (flt("我的身分", [[act("me")]]), me_flow),
                         (flt("申請入會", [[act("apply")]]), apply_flow),
+                        (flt("拍名片填表", [[act("scan"), c("{{1.card}}", "exist")]]), scan_flow),
                     ])]),
                 ])]),
             (flt("格式不對", [[c("{{1.a}}", "notexist")],
-                              [c("{{1.a}}", "text:notequal", a) for a in ("approve", "sync", "me", "apply")],
-                              [act("me"), c("{{1.t}}", "notexist")], [act("apply"), c("{{1.t}}", "notexist")]]), [
+                              [c("{{1.a}}", "text:notequal", a) for a in ("approve", "sync") + PAGE_ACTS],
+                              *[[act(a), c("{{1.t}}", "notexist")] for a in PAGE_ACTS]]), [
                 respond_json("回傳格式不對", '{"ok":false,"error":"bad_request"}', "400")]),
         ]),
     ]

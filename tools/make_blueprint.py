@@ -146,8 +146,8 @@ class B:
                 "metadata": {"designer": {"x": 600, "y": self.y, "name": name}}, "routes": rs}
 
 
-def gemini_body():
-    """請 Gemini 看名片照片，直接回傳固定欄位的 JSON，不用再從文字裡挖資料。"""
+def gemini_body(image="{{1.card}}"):
+    """請 Gemini 看名片照片，直接回傳固定欄位的 JSON，不用再從文字裡挖資料。image：照片 base64 的對應欄位。"""
     prompt = ("這是一張名片的照片。請讀出名片上的資訊填入欄位，讀不到的欄位一律給空字串，不要猜。"
               "姓名只放人名。電話和手機保留名片上的寫法，有多支就用「、」分隔；09 開頭或標示 Mobile 的放手機。"
               "其他聯絡方式放 LINE ID、傳真、統一編號、社群帳號，每項前面寫上名稱。"
@@ -159,8 +159,10 @@ def gemini_body():
     body = {
         "contents": [{"role": "user", "parts": [
             {"text": prompt},
-            {"inline_data": {"mime_type": "image/jpeg", "data": "{{1.card}}"}}]}],
-        "generationConfig": {"responseMimeType": "application/json"},
+            {"inline_data": {"mime_type": "image/jpeg", "data": image}}]}],
+        # thinkingLevel low：2026-10-21 實測同一張名片，預設思考量要 180～220 秒（超過 Make webhook 的 180 秒上限），
+        # low 約 50 秒、讀得一樣完整。minimal 這個模型不支援，會直接回錯誤
+        "generationConfig": {"responseMimeType": "application/json", "thinkingConfig": {"thinkingLevel": "low"}},
     }
     # 直接給物件（不是 JSON 字串）：Make 會自己轉成 JSON，照片的 base64 和中文提示都不用擔心跳脫
     return body
