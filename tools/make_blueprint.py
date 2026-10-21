@@ -22,6 +22,8 @@ CHANNEL = LN["login_channel_id"]
 # 可用的模型清單會變（2.5 系列已在 2026-10-16 停用），換模型時用 Make 的 Gemini 模組下拉選單確認名稱
 MODEL = CFG.get("gemini_model", "gemini-3.8-flash")
 ORIGIN = CFG.get("page_origin") or "*"
+# 同一個 Make 帳號裡有多個專案時，情境名稱前面加上專案名，例如「朕宏｜名片」（另外在 Make 用同名標籤分類）
+PREFIX = f"{CFG['project']}｜" if CFG.get("project") else ""
 # 建立時的暫時姓名；頁面看到這個值會當成空白（liff/namecard/app.js 的 PENDING_NAME）
 PENDING_NAME = "（待辨識）"
 
@@ -302,7 +304,7 @@ def build(test_hook=None):
                 ])]),
         ]),
     ]
-    return blueprint("名片", flow)
+    return blueprint(PREFIX + "名片", flow)
 
 
 def build_menu():
@@ -327,7 +329,7 @@ def build_menu():
          "mapper": {"url": "/v2/bot/user/all/richmenu/{{2.richMenuId}}", "method": "POST", "headers": []},
          "metadata": {"designer": {"x": 600, "y": 0, "name": "設為所有人的預設選單"}, "parameters": line_meta}},
     ]
-    bp = blueprint("名片：建立圖文選單", flow)
+    bp = blueprint(PREFIX + "名片：建立圖文選單", flow)
     bp["metadata"]["instant"] = False
     return bp
 

@@ -1,7 +1,7 @@
 """產生名片官方帳號的圖文選單圖片：assets/richmenu.png（2500 × 843，左右兩格）。
 
 左格「拍名片」打開 LIFF 頁面；右格「待確認」打開 ?v=review。按鈕的範圍寫在 make_blueprint.py 的 build_menu()。
-換設計時改這裡、重新執行，推上 GitHub 後再到 Make 執行一次情境「名片：建立圖文選單」。
+換設計時改這裡、重新執行，推上 GitHub 後再到 Make 執行一次情境「朕宏｜名片：建立圖文選單」。
 
 執行：python tools/make_richmenu.py
 """

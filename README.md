@@ -17,7 +17,7 @@
 | 部分 | 位置 | 說明 |
 |---|---|---|
 | LIFF 頁面 | `liff/namecard/` | `index.html` 版面、`app.js` 程式、`mock.js` 本機預覽用的模擬資料 |
-| Make 情境「名片」 | `tools/make_blueprint.py` 產生 `make/名片.blueprint.json` | 一個 webhook，欄位 `a` 分辨動作：`submit`、`list`、`save` |
+| Make 情境「朕宏｜名片」 | `tools/make_blueprint.py` 產生 `make/名片.blueprint.json` | 一個 webhook，欄位 `a` 分辨動作：`submit`、`list`、`save`。放在 Make 的「朕宏」資料夾、貼「朕宏」標籤（同一帳號還有「苗栗」專案） |
 | Notion 資料庫「名片」 | | 欄位名稱要和 `make_blueprint.py` 的 `FIELDS` 一字不差；建好後鎖定資料庫 |
 | Google 雲端硬碟資料夾 | | 存名片照片與合照；資料夾設成「知道連結的人都能檢視」，Notion 和頁面才看得到照片 |
 

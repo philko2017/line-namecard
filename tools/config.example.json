@@ -1,5 +1,6 @@
 {
-  "_說明": "複製成 config.local.json 再填入自己的 ID",
+  "_說明": "複製成 config.local.json 再填入自己的 ID。project 是情境名稱的前綴（例如填「朕宏」會變成「朕宏｜名片」），不需要就留空",
+  "project": "",
   "make": {
     "team_id": 0,
     "folder_id": 0,
