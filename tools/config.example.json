@@ -18,6 +18,13 @@
   "notion": {
     "data_source_id": "名片資料庫的 data source ID（collection://… 後面那串）"
   },
+  "member": {
+    "hook_id": 0,
+    "events_hook_id": 0,
+    "data_source_id": "會員名冊的 data source ID",
+    "approve_key": "隨機密鑰（也寫在 Notion 會員名冊的「核准」「套用身分」公式裡）",
+    "liff_id": "會員頁面的 LIFF ID"
+  },
   "gemini_model": "gemini-3.8-flash",
   "page_origin": "https://<GitHub 帳號>.github.io"
 }

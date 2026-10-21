@@ -1,0 +1,8 @@
+{
+  "_說明": "協會的名稱與介紹。和 logo.png（橫式）、mark.png（圓環標誌）放在一起；換 Logo 或改文字後推上 GitHub，頁面就會更新。選單圖片要另外執行 tools/make_richmenu.py 並到 Make 執行建立圖文選單。",
+  "name": "北區室內設計進修聯誼會",
+  "short": "IDN 北區",
+  "about": "北區室內設計進修聯誼會（Interior Design Network of Northern Taiwan）是室內設計從業人員交流、進修與參訪的平台。加入會員可以參加課程與參訪活動，並使用會員專屬的工具。",
+  "contact": "",
+  "colors": { "primary": "#9A6432", "accent": "#B39B6A" }
+}

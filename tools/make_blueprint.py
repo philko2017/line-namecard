@@ -188,6 +188,21 @@ def build(test_hook=None):
     act = lambda a: c("{{1.a}}", "text:equal", a)
     ACTS = ["submit", "list", "save"]
 
+    def member_gate(actions):
+        """有設定會員模組（config 的 member）時，名片限「正式會員」使用：查會員名冊，不是正式會員就回 403 not_allowed。
+        每次呼叫多用 1 點；沒有設定會員模組時不檢查，任何好友都能用。"""
+        if not CFG.get("member"):
+            return [actions]
+        m = b.notion("searchObjects1", "查會員身分", {"limit": "1", "select": "data_source_item",
+                                                  "data_source": CFG["member"]["data_source_id"],
+                                                  "filter": [[c("LINE User ID |&*^%$#@| rich_text", "text:equals", USER)]]})
+        ident = sp(m["id"], "身分", ".name")
+        return [m, b.router("是不是正式會員", [
+            (flt("正式會員", [[c(ident, "text:equal", "正式會員")]]), [actions]),
+            (flt("不是正式會員", [[c(ident, "text:notequal", "正式會員")]]), [
+                b.respond("回傳限會員使用", '{"ok":false,"error":"not_allowed"}', "403")]),
+        ])]
+
     # ==== submit：先回應頁面，再存照片 → 辨識 → 寫入 ====
     dup = b.search("請求編號是否已送過", [c("請求編號 |&*^%$#@| rich_text", "text:equals", "{{1.rid}}")])
     D = dup["id"]
@@ -296,11 +311,11 @@ def build(test_hook=None):
                 b.router("身分驗證", [
                     (flt("不是本系統的憑證", [[c("{{2.data.client_id}}", "text:notequal", CHANNEL)]]), [
                         b.respond("回傳驗證失敗", '{"ok":false,"error":"auth"}', "401")]),
-                    (flt("身分驗證成功", [[auth_ok]]), [profile, b.router("依動作分流", [
+                    (flt("身分驗證成功", [[auth_ok]]), [profile, *member_gate(b.router("依動作分流", [
                         (flt("送出照片", [[act("submit")]]), submit_flow),
                         (flt("待確認清單", [[act("list")]]), list_flow),
                         (flt("確認存入", [[act("save")]]), save_flow),
-                    ])]),
+                    ]))]),
                 ])]),
         ]),
     ]

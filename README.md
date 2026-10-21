@@ -38,6 +38,36 @@
 3. 把 `liff/namecard/app.js` 開頭 `CONFIG` 的 `liffId`、`apiUrl` 換成自己的，`index.html` 的 CSP `connect-src` 換成 webhook 的網域。
 4. 把 `liff/namecard/` 放上 GitHub Pages，網址填到 LIFF app 的 Endpoint URL。
 
+## 會員模組（選單切換）
+
+協會的官方帳號依身分顯示不同選單：
+
+```
+加好友 ──► 潛在會員 ──申請入會──► 審核中 ──核准──► 正式會員
+         （訪客選單）            （訪客選單）        （會員選單）
+正式會員 ──停權──► 訪客選單
+```
+
+| 部分 | 位置 | 說明 |
+|---|---|---|
+| 會員頁面（LIFF） | `liff/member/` | 依身分顯示：申請入會表單／審核中／會員資料與會員功能／停權。`?v=about` 是協會介紹 |
+| 協會品牌 | `assets/brand/` | `logo.png` 橫式 Logo（頁面頂端）、`mark.png` 圓環標誌（選單、頁面圖示）、`brand.json` 名稱與介紹 |
+| 選單圖片 | `tools/make_member_richmenu.py` 產生 `assets/richmenu_guest.png`、`richmenu_member.png` | 左側協會標誌（關於協會），右側功能格 |
+| Make 情境 | `tools/make_member_blueprint.py` 產生三份藍圖 | 「朕宏｜會員 API」「朕宏｜會員：LINE 事件」「朕宏｜會員：建立圖文選單」 |
+| Notion | 「會員名冊」資料庫 | 「核准」「套用身分」兩個公式欄位是連結，點了就呼叫 Make |
+
+**換選單的規則集中在一個地方**：核准、套用身分、打開會員頁面時的校正，最後都是「依 Notion 的身分，綁定或解除會員選單，再把『目前選單』寫回 Notion」。打開會員頁面時發現兩邊對不上，會自動校正（苗栗踩過舊選單卡住的問題）。
+
+**管理者的操作**（都在 Notion 會員名冊）：
+- 核准入會：點那一列的「✅ 核准入會」連結（身分是審核中才會出現）。
+- 停權或恢復：改「身分」欄位，再點「🔄 套用到 LINE 選單」。
+
+核准連結裡有一組密鑰（`config.local.json` 的 `member.approve_key`，也寫在 Notion 公式裡），沒有密鑰的請求會被擋下。要換密鑰時兩邊一起改。
+
+**換 Logo 或協會介紹**：覆蓋 `assets/brand/` 裡的檔案（檔名不變）→ 推上 GitHub，頁面就會更新。選單圖片要再執行 `python tools/make_member_richmenu.py`、推上 GitHub，到 Make 手動執行「朕宏｜會員：建立圖文選單」；它會清掉舊選單，並把所有正式會員重新綁到新的會員選單。
+
+**名片限會員使用**：設定了 `member` 時，名片情境會先查會員名冊，不是正式會員就回 `not_allowed`（每次多 1 點）。
+
 ## 本機預覽
 
 ```bash

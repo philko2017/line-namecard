@@ -250,7 +250,7 @@ function handleApiError(e) {
   }
   if (e.code === "not_allowed") {
     $("#bar").hidden = true;
-    $("#app").innerHTML = `<div class="blocked"><h2>尚未開通</h2><p>名片功能限內部同仁使用，請洽管理者開通。</p></div>`;
+    $("#app").innerHTML = `<div class="blocked"><h2>限正式會員使用</h2><p>名片功能是會員專屬功能。請先到「會員專區」申請入會，核准後就能使用。</p></div>`;
     return true;
   }
   return false;
